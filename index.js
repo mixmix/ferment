@@ -232,7 +232,7 @@ function FeedArray (stream) {
     pull.drain(function (item) {
       if (!item.sync) {
         if (item.value.content.type === 'ferment/audio') {
-          result.push(AudioPost(item.value))
+          result.insert(AudioPost(item.value), 0)
         }
       }
     })
