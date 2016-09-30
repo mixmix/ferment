@@ -1,0 +1,133 @@
+AudioPost {
+  display: flex
+  margin-top: 10px
+  width: 700px
+  background: #3C3C3C
+  border: 3px solid #333
+
+  transition: border-color 0.2s, background-color 0.2s
+
+  -playing, -waiting {
+    border-color: #172B17
+    background-color: #293A29
+    box-shadow: 0 0 4px #000
+
+    div.main {
+      div.display {
+        background-color: #3F5A3E
+
+        div.progress {
+          background-color: #0F0
+        }
+
+        svg {
+          rect {
+            fill: #EEE
+          }
+        }
+      }
+    }
+  }
+
+  div.artwork {
+    height: 160px
+    width: 160px
+    background: linear-gradient(100deg, #7B7B7B, #6A6B8C)
+    background-size: cover
+    background-position: 50% 50%
+  }
+
+  div.main {
+    display: flex
+    flex-direction: column
+    flex: 1
+    padding: 10px
+
+    div.title {
+      display: flex
+      a.play {
+        display: block
+        height: 30px
+        width: 30px
+        font-size: 30px
+
+        :hover {
+          text-decoration: none
+        }
+      }
+      header {
+        margin-left: 10px
+        flex: 1
+        div.feedTitle {
+          color: #BBB
+          font-size: 90%
+        }
+        div.title {
+          color: #EEE
+          font-size: 130%
+        }
+      }
+    }
+
+    div.display {
+      flex: 1
+      position: relative
+      margin: 15px 0
+      background: #444
+
+      svg {
+        position: absolute
+        top: 0; bottom: 0; left: 0; right: 0
+        max-height: 100%
+
+        rect {
+          fill: #D1C0FB
+          transform: translate(0, -50%)
+        }
+      }
+
+      div.progress {
+        position: absolute
+        pointer-events: none
+        top: 0; bottom: 0; left: 0
+        background-color: #FFF
+        opacity: 0.2
+      }
+
+      span {
+        position: absolute
+        color: #CBD8CB
+        padding: 4px
+        background: rgb(47, 47, 47)
+        font-family: monospace
+      }
+
+      span.position {
+        bottom: 0
+        left: 0
+      }
+
+      span.duration {
+        bottom: 0
+        right: 0
+      }
+    }
+
+    div.options {
+      a {
+        padding: 2px 5px
+        margin-right: 5px
+        border: 1px solid #656363
+        border-radius: 4px
+        background: #444444
+        color: #C5C5C5
+
+        :hover {
+          text-decoration: none
+          color: white
+          border-color: #888
+        }
+      }
+    }
+  }
+}

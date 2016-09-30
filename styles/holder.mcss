@@ -1,0 +1,61 @@
+Holder {
+  height: 100%
+  display: flex
+  flex-direction: column
+
+  div.top {
+    display: flex
+    background: #333
+    padding: 10px
+    border-bottom: 2px solid #222
+    box-shadow: 0 0 3px #222
+    position: relative
+    padding-left: 70px
+
+    span {
+      a {
+        padding: 2px 5px
+        border: 2px solid #505050
+        border-radius: 4px
+        background: #313030
+        color: #C5C5C5
+        font-size: 120%
+
+        :hover {
+          text-decoration: none
+          color: white
+          border-color: #888
+        }
+      }
+    }
+
+    span.appTitle {
+      -webkit-app-region: drag
+      flex: 1
+      text-align: center
+      font-size: 130%
+      color: #D6D1A9
+      letter-spacing: 0.1em
+      text-shadow: 1px 1px 1px black
+      font-weight: bold
+      text-transform: uppercase
+    }
+  }
+
+  div.main {
+    flex: 1
+    overflow: auto
+  }
+
+  div.bottom {
+    min-height: 60px
+    padding: 4px
+    background: #222
+    align-items: center
+    display: flex
+
+    audio {
+      width: 100%
+    }
+  }
+}
