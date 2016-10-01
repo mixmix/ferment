@@ -1,298 +1,136 @@
-var pull = require('pull-stream')
-var Value = require('@mmckegg/mutant/value')
-var Struct = require('@mmckegg/mutant/struct')
-var MutantArray = require('@mmckegg/mutant/array')
-var MutantMap = require('@mmckegg/mutant/map')
-var h = require('./lib/h')
-var svg = require('./lib/svg')
-var send = require('@mmckegg/mutant/send')
-var insertCss = require('insert-css')
-var when = require('@mmckegg/mutant/when')
-var watch = require('@mmckegg/mutant/watch')
-var extend = require('xtend')
-
-var computed = require('@mmckegg/mutant/computed')
-var generateMeta = require('./lib/generate-meta')
-var drawSvgOverview = require('./lib/svg-overview')
-
-var convert = require('./lib/convert')
-var shasum = require('./lib/shasum')
-
-var WebTorrent = require('webtorrent')
-var createTorrent = require('create-torrent')
 var join = require('path').join
-var getExt = require('path').extname
+var electron = require('electron')
 var fs = require('fs')
+var ServeBlobs = require('./lib/serve-blobs')
+var openWindow = require('./window')
 
-require('./lib/context-menu')
-insertCss(require('./styles'))
+var windows = {}
 
-var playButtonIcons = {
-  paused: '\u25B6',
-  playing: '⏸',
-  waiting: '📶'
+if (electron.app.makeSingleInstance((commandLine, workingDirectory) => {
+  if (windows.main) {
+    if (windows.main.isMinimized()) windows.main.restore()
+    windows.main.focus()
+  } else {
+    openMainWindow()
+  }
+})) {
+  electron.app.quit()
 }
 
-var db = window.db
-var feed = FeedArray(db.createFeedStream({live: true}))
+var createSbot = require('scuttlebot')
+  .use(require('scuttlebot/plugins/master'))
+  .use(require('scuttlebot/plugins/gossip'))
+  .use(require('scuttlebot/plugins/friends'))
+  .use(require('scuttlebot/plugins/replicate'))
+  .use(require('ssb-blobs'))
+  .use(require('scuttlebot/plugins/invite'))
+  .use(require('scuttlebot/plugins/block'))
+  .use(require('scuttlebot/plugins/logging'))
+  .use(require('scuttlebot/plugins/private'))
+  .use(require('scuttlebot/plugins/local'))
+  .use(require('scuttlebot/plugins/plugins'))
 
-var torrentClient = new WebTorrent()
+var ssbKeys = require('ssb-keys')
 
-var mediaPath = db.config.mediaPath
-var audioElement = h('audio', { controls: true })
-var lastServer = null
-
-fs.readdir(db.config.mediaPath, function (err, entries) {
-  if (err) throw err
-  entries.forEach((name) => {
-    if (getExt(name) === '.torrent') {
-      torrentClient.add(join(mediaPath, name), { path: mediaPath }, function (torrent) {
-        console.log('seeding', name)
-      })
-    }
-  })
+var ssbConfig = require('ssb-config/inject')('ferment', {
+  port: 1024 + (~~(Math.random() * (65536 - 1024))),
+  blobsPort: 1024 + (~~(Math.random() * (65536 - 1024)))
 })
 
-// add('/Users/matt/Desktop/Frontier (live at Garrett Landing).mp3', {
-//   title: 'Frontier (live at Garrett Landing)',
-//   license: 'CC BY-SA 4.0',
-//   artworkSrc: 'https://i1.sndcdn.com/artworks-000183021825-8bebab-t500x500.jpg'
-// })
-//
-// add('/Users/matt/Desktop/Old School Techno Jam (Art~Hack 22 September 2016).m4a', {
-//   title: 'Old School Techno Jam (Art~Hack 22 September 2016)',
-//   license: 'CC BY-SA 4.0',
-//   artworkSrc: 'https://i1.sndcdn.com/artworks-000185414676-hv9vtj-t500x500.jpg'
-// })
+ssbConfig.mediaPath = join(ssbConfig.path, 'media')
+ssbConfig.keys = ssbKeys.loadOrCreateSync(join(ssbConfig.path, 'secret'))
 
-var currentlyPlaying = null
+if (!fs.existsSync(ssbConfig.mediaPath)) {
+  fs.mkdirSync(ssbConfig.mediaPath)
+}
 
-function add (path, data) {
-  generateMeta(path, function (err, meta) {
-    if (err) throw err
-    console.log('generated meta', meta)
-    var toPath = join(mediaPath, `importing-${Date.now()}.ogg`)
-    convert(path, toPath, function (err) {
-      if (err) throw err
-      console.log('converted to ogg')
-      shasum(toPath, function (err, hash) {
-        if (err) throw err
-        var finalPath = join(mediaPath, `${hash}.ogg`)
-        var torrentPath = join(mediaPath, `${hash}.torrent`)
-        console.log('generate hash', hash)
-        fs.rename(toPath, finalPath, function (err) {
-          if (err) throw err
-          createTorrent(finalPath, function (err, torrent) {
-            if (err) throw err
-            fs.writeFile(torrentPath, torrent, function (err) {
-              if (err) throw err
-              torrentClient.add(torrentPath, { path: mediaPath }, function (torrent) {
-                console.log('seeding torrent', torrentPath)
-                var item = extend({
-                  type: 'ferment/audio',
-                  audioSrc: torrent.magnetURI
-                }, meta, data)
+var context = {
+  db: createSbot(ssbConfig),
+  config: ssbConfig
+}
 
-                console.log('publishing', item)
-                db.publish(item, function (err) {
-                  if (err) throw err
-                  console.log('published')
-                })
-              })
-            })
-          })
-        })
-      })
+require('http').createServer(ServeBlobs(context.db)).listen(context.config.blobsPort)
+ssbConfig.manifest = context.db.getManifest()
+
+electron.app.on('ready', function () {
+  setupIpc()
+  startBackgroundProcess()
+  openMainWindow()
+})
+
+electron.app.on('activate', function (e) {
+  openMainWindow()
+})
+
+function openMainWindow () {
+  if (!windows.main) {
+    windows.main = openWindow(context, __dirname + '/views/main-window.js', {
+      width: 1024,
+      height: 768,
+      titleBarStyle: 'hidden-inset',
+      title: 'Ferment',
+      backgroundColor: '#444',
+      acceptFirstMouse: true,
+      webPreferences: {
+        experimentalFeatures: true
+      }
     })
+    windows.main.on('closed', function () {
+      windows.main = null
+    })
+  }
+}
+
+function startBackgroundProcess () {
+  windows.background = openWindow(context, __dirname + '/background.js', {
+    center: true,
+    fullscreen: false,
+    fullscreenable: false,
+    height: 150,
+    maximizable: false,
+    minimizable: false,
+    resizable: false,
+    show: false,
+    skipTaskbar: true,
+    title: 'ferment-background-window',
+    useContentSize: true,
+    width: 150
   })
 }
 
-function togglePlay (audio) {
-  if (currentlyPlaying === audio || !audio) {
-    if (audio.state() !== 'paused') {
-      audioElement.pause()
-    } else {
-      audioElement.play()
-    }
-  } else {
-    if (currentlyPlaying) {
-      audioElement.pause()
-    }
+function setupIpc () {
+  var messageQueueMainToBackground = []
 
-    if (lastServer) {
-      lastServer.close()
-    }
-
-    audio.state.set('waiting')
-
-    var torrent = torrentClient.get(audio.audioSrc())
-    var server = torrent.createServer()
-    server.listen(0, function () {
-      var port = server.address().port
-      var url = 'http://localhost:' + port + '/0'
-      audioElement.src = url
-      audioElement.ontimeupdate = function (e) {
-        audio.position.set(e.target.currentTime)
-      }
-      audioElement.onwaiting = () => audio.state.set('waiting')
-      audioElement.onplaying = () => audio.state.set('playing')
-      audioElement.onpause = () => audio.state.set('paused')
-      audioElement.onended = () => {
-        currentlyPlaying.position.set(0)
-        playNext()
-      }
-      audioElement.currentTime = audio.position() || 0
-      audioElement.play()
-      currentlyPlaying = audio
+  electron.ipcMain.once('ipcBackgroundReady', function (e) {
+    electron.app.ipcBackgroundReady = true
+    messageQueueMainToBackground.forEach(function (message) {
+      windows.background.send(message.name, ...message.args)
     })
-  }
-}
-
-function playNext () {
-  var index = feed.indexOf(currentlyPlaying)
-  var next = feed.get(index + 1)
-  if (next) {
-    next.position.set(0)
-    togglePlay(next)
-  }
-}
-
-document.body.appendChild(
-  h('Holder', [
-    h('div.top', [
-      h('span.appTitle', ['Ferment']),
-      h('span', [
-        h('a.upload', {href: '#'}, ['+ Upload'])
-      ])
-    ]),
-    h('div.main', [
-      h('Feed', [
-        h('h1', 'Feed'),
-        MutantMap(feed, function (item) {
-          return h('AudioPost', {
-            classList: [
-              computed(item.state, (s) => `-${s}`)
-            ]
-          }, [
-            h('div.artwork', { style: {
-              'background-image': computed(item.artworkSrc, (src) => `url("${src}")`)
-            }}),
-            h('div.main', [
-              h('div.title', [
-                h('a.play', { 'ev-click': send(togglePlay, item), href: '#' }, [
-                  computed(item.state, (s) => playButtonIcons[s || 'paused'])
-                ]),
-                h('header', [
-                  h('div.feedTitle', [item.feedTitle]),
-                  h('div.title', [item.title])
-                ])
-              ]),
-              h('div.display', {
-                hooks: [
-                  SetPositionHook(item)
-                ]
-              }, [
-                svg('svg', {
-                  viewBox: '0 0 600 100',
-                  preserveAspectRatio: 'none',
-                  hooks: [
-                    ComputedInnerHtmlHook([item.overview, 600, 100], drawSvgOverview)
-                  ]
-                }),
-                h('div.progress', {
-                  style: {
-                    width: computed([item.position, item.duration], (pos, dur) => Math.round(pos / dur * 1000) / 10 + '%')
-                  }
-                }),
-                when(item.position, h('span.position', computed(item.position, formatTime))),
-                h('span.duration', computed(item.duration, formatTime))
-              ]),
-              h('div.options', [
-                h('a.like', {href: '#'}, '💚 Like'),
-                h('a.repost', {href: '#'}, '📡 Repost'),
-                h('a.download', {href: '#'}, '⬇️ Download')
-              ])
-            ])
-          ])
-        })
-      ])
-
-    ]),
-    h('div.bottom', [
-      audioElement
-    ])
-  ])
-
-)
-
-function FeedArray (stream) {
-  var result = MutantArray()
-  pull(
-    stream,
-    pull.drain(function (item) {
-      if (!item.sync) {
-        if (item.value.content.type === 'ferment/audio') {
-          result.insert(AudioPost(item.value), 0)
-        }
-      }
-    })
-  )
-  return result
-}
-
-function AudioPost (item) {
-  var result = Struct({
-    title: Value(),
-    description: Value(),
-    license: Value(),
-    overview: Value(),
-    duration: Value(0, {defaultValue: 0}),
-    audioSrc: Value(),
-    artworkSrc: Value()
   })
 
-  result.feedTitle = Value('DESTROY WITH SCIENCE')
-  result.position = Value(0)
-  result.state = Value()
-
-  if (item) {
-    result.set(item.content)
-  }
-
-  return result
-}
-
-function ComputedInnerHtmlHook (args, fn) {
-  return function (element) {
-    return watch(computed(args, fn), value => element.innerHTML = value)
-  }
-}
-
-function SetPositionHook (item) {
-  return function (element) {
-    element.onmousemove = element.onmousedown = function (ev) {
-      if (ev.buttons && ev.button === 0) {
-        var box = ev.currentTarget.getBoundingClientRect()
-        var x = ev.clientX - box.left
-        if (x < 5) {
-          x = 0
+  var oldEmit = electron.ipcMain.emit
+  electron.ipcMain.emit = function (name, e, ...args) {
+    // Relay messages between the main window and the background window
+    if (name.startsWith('bg-') && !electron.app.isQuitting) {
+      if (e.sender.browserWindowOptions.title === 'ferment-background-window') {
+        // Send message to main window
+        if (windows.main) {
+          windows.main.send(name, ...args)
         }
-        setPosition(x / box.width * item.duration())
+      } else if (electron.app.ipcBackgroundReady) {
+        // Send message to webtorrent window
+        windows.background.send(name, ...args)
+      } else {
+        // Queue message for background window, it hasn't finished loading yet
+        messageQueueMainToBackground.push({
+          name: name,
+          args: args
+        })
       }
-    }
-  }
-
-  function setPosition (position) {
-    if (currentlyPlaying === item) {
-      audioElement.currentTime = position
+      return
     }
 
-    item.position.set(position)
+    // Emit all other events normally
+    oldEmit.call(electron.ipcMain, name, e, ...args)
   }
-}
-
-function formatTime (value) {
-  var minutes = Math.floor(value / 60)
-  var seconds = Math.round(value % 60)
-  return minutes + ':' + ('0' + seconds).slice(-2)
 }
