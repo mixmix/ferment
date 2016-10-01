@@ -9,12 +9,14 @@ module.exports = function Window (context, path, opts) {
   window.webContents.on('dom-ready', function () {
     var ssbClientPath = __dirname + '/lib/ssb-client.js'
     window.webContents.executeJavaScript(`
+      var electron = require('electron')
       var render = require(${JSON.stringify(path)})
       var insertCss = require('insert-css')
       var h = require('../lib/h')
 
       require('../lib/context-menu')
       insertCss(require('../styles'))
+      electron.webFrame.setZoomLevelLimits(1, 1)
 
       window.rootContext = {
         db: require(${JSON.stringify(ssbClientPath)})(
