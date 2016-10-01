@@ -28,6 +28,7 @@ It should also be possible to host your own server that allows people without th
 - [ ] Make Save / Download button work
 - [ ] User setup (choose username, title, location, bio, picture, banner)
 - [ ] Specific Artist Feed
+- [ ] Allow "delete" of audio posts (some kind of tombstoning)
 - [ ] Local Discovery
 - [ ] Likes
 - [ ] Reposting
@@ -36,6 +37,10 @@ It should also be possible to host your own server that allows people without th
 - [ ] Display following stats
 - [ ] Playlists
 - [ ] Show seed stats
+- [ ] Backgrounding (keep seeding / syncing when main window is closed)
+- [ ] Allow revisions (some kind of special reply that replaces the content with new content)
+- [ ] Figure out a way to track listens? [Would be difficult given the decentralized nature of this. Might be better to show swarm strength or some other clever metric]
+- [ ] Commenting? This is a pretty major part of soundcloud, but I'm personally not really a fan
 
 ### Server
 
