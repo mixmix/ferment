@@ -1,0 +1,39 @@
+button {
+  border: 2px solid #7B7B7B
+  background: #505050
+  color: #CCCCCC
+  border-radius: 4px
+  padding: 4px 10px
+  font-size: 130%
+  margin-left: 10px
+  cursor: pointer
+
+  :hover {
+    color: white
+    border-color: #8B8B8B
+  }
+
+  :focus {
+    outline: 1px dotted rgba(255, 255, 255, 0.45)
+  }
+
+  :active {
+    background-color: #333 !important
+  }
+
+  -save {
+    border-color: #498849
+    background-color: #255D24
+    text-shadow: 1px 1px 1px #000
+    color: white
+
+    :active {
+      background-color: #1F331F !important
+    }
+
+    :hover {
+      background-color: #356D34
+      border-color: #4CB54C
+    }
+  }
+}

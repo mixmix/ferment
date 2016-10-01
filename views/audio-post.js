@@ -1,10 +1,8 @@
 var h = require('../lib/h')
-var svg = require('../lib/svg')
 var send = require('@mmckegg/mutant/send')
 var computed = require('@mmckegg/mutant/computed')
 var when = require('@mmckegg/mutant/when')
-var watch = require('@mmckegg/mutant/watch')
-var drawSvgOverview = require('../lib/svg-overview')
+var AudioOverview = require('../widgets/audio-overview')
 
 var playButtonIcons = {
   paused: '\u25B6',
@@ -39,13 +37,7 @@ module.exports = function (item) {
           SetPositionHook(item)
         ]
       }, [
-        svg('svg', {
-          viewBox: '0 0 600 100',
-          preserveAspectRatio: 'none',
-          hooks: [
-            ComputedInnerHtmlHook([item.overview, 600, 100], drawSvgOverview)
-          ]
-        }),
+        AudioOverview(item.overview, 600, 100),
         h('div.progress', {
           style: {
             width: computed([item.position, item.duration], (pos, dur) => Math.round(pos / dur * 1000) / 10 + '%')
@@ -61,12 +53,6 @@ module.exports = function (item) {
       ])
     ])
   ])
-}
-
-function ComputedInnerHtmlHook (args, fn) {
-  return function (element) {
-    return watch(computed(args, fn), value => element.innerHTML = value)
-  }
 }
 
 function SetPositionHook (item) {

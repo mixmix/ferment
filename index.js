@@ -4,7 +4,9 @@ var fs = require('fs')
 var ServeBlobs = require('./lib/serve-blobs')
 var openWindow = require('./window')
 
-var windows = {}
+var windows = {
+  adders: new Set()
+}
 
 if (electron.app.makeSingleInstance((commandLine, workingDirectory) => {
   if (windows.main) {
@@ -62,6 +64,8 @@ electron.app.on('activate', function (e) {
   openMainWindow()
 })
 
+electron.ipcMain.on('open-add-window', openAddWindow)
+
 function openMainWindow () {
   if (!windows.main) {
     windows.main = openWindow(context, __dirname + '/views/main-window.js', {
@@ -79,6 +83,32 @@ function openMainWindow () {
       windows.main = null
     })
   }
+}
+
+function openAddWindow () {
+  var window = openWindow(context, __dirname + '/views/add-audio-post.js', {
+    //parent: windows.main,
+    width: 850,
+    height: 350,
+    useContentSize: true,
+    maximizable: false,
+    fullscreenable: false,
+    skipTaskbar: true,
+    resizable: false,
+    title: 'Add Audio File',
+    backgroundColor: '#444',
+    acceptFirstMouse: true
+  })
+
+  // if (windows.main) {
+  //   window.setParentWindow(windows.main)
+  // }
+
+  windows.adders.add(window)
+
+  window.on('closed', function () {
+    windows.adders.delete(window)
+  })
 }
 
 function startBackgroundProcess () {
@@ -117,6 +147,8 @@ function setupIpc () {
         if (windows.main) {
           windows.main.send(name, ...args)
         }
+
+        windows.adders.forEach(window => window.send(name, ...args))
       } else if (electron.app.ipcBackgroundReady) {
         // Send message to webtorrent window
         windows.background.send(name, ...args)

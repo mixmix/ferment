@@ -2,6 +2,7 @@ var h = require('../lib/h')
 var MutantArray = require('@mmckegg/mutant/array')
 var MutantMap = require('@mmckegg/mutant/map')
 
+var electron = require('electron')
 var pull = require('pull-stream')
 var Player = require('../widgets/player')
 var AudioPost = require('../models/audio-post')
@@ -20,7 +21,7 @@ module.exports = function (parentContext) {
     h('div.top', [
       h('span.appTitle', ['Ferment']),
       h('span', [
-        h('a.upload', {href: '#'}, ['+ Upload'])
+        h('a.upload', {href: '#', 'ev-click': openAddWindow}, ['+ Add Audio'])
       ])
     ]),
     h('div.main', [
@@ -48,4 +49,8 @@ function FeedArray (context, opts) {
     })
   )
   return result
+}
+
+function openAddWindow () {
+  electron.ipcRenderer.send('open-add-window')
 }

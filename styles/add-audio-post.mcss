@@ -1,0 +1,162 @@
+AddAudioPost {
+  display: flex
+  flex-direction: column
+
+  section {
+    flex: 1
+    display: flex
+
+    div.artwork {
+      height: 300px
+      width: 300px
+      background: linear-gradient(100deg, #7B7B7B, #6A6B8C)
+      background-size: cover
+      background-position: 50% 50%
+      display: flex
+      align-items: center
+      justify-content: center
+      position: relative
+
+      input {
+        opacity: 0
+        position: absolute
+        top: 0; bottom: 0; left: 0; right: 0
+        width: 100%
+        cursor: pointer
+      }
+
+      :hover {
+        span {
+          opacity: 1
+        }
+      }
+
+      span {
+        background: #444
+        padding: 4px 8px
+        border-radius: 5px
+        transition: opacity 0.2s
+        opacity: 0.5
+        color: white
+        margin-bottom: -200px
+      }
+    }
+
+    div.main {
+      flex: 1
+      display: flex
+      flex-direction: column
+
+      div.info {
+        display: flex
+        flex-direction: column
+
+        input {
+          display: block
+          margin: 10px
+          background: #333
+          font-size: 140%
+          padding: 10px
+          color: #EEE
+          border: 1px solid #222
+
+          :focus {
+            color: white
+          }
+        }
+
+        textarea {
+          border: 1px solid #222
+          display: block
+          margin: 0 10px
+          flex: 1
+          background: #333
+          padding: 10px
+          font-size: 110%
+          color: #EEE
+          min-height: 0
+
+          :focus {
+            color: white
+          }
+        }
+      }
+
+      div.audio {
+        flex: 1
+        display: flex
+        align-items: center
+        justify-content: center
+        position: relative
+        margin: 15px 0
+        background: #29343C
+        margin: 10px
+        height: 60px
+        border: 1px solid #333
+
+        -processing {
+          background-image: linear-gradient( -45deg, rgba(255, 154, 26, 1) 25%, transparent 25%, transparent 50%, rgba(255, 154, 26, 1) 50%, rgba(255, 154, 26, 1) 75%, transparent 75%, transparent )
+          background-size: 50px 50px
+          animation: audioProcessingAnimation 2s linear infinite
+        }
+
+        input {
+          opacity: 0
+          position: absolute
+          top: 0; bottom: 0; left: 0; right: 0
+          width: 100%
+          cursor: pointer
+        }
+
+        :hover {
+          span {
+            opacity: 1
+          }
+        }
+
+        span {
+          background: #444
+          padding: 4px 8px
+          border-radius: 5px
+          transition: opacity 0.2s
+          opacity: 0.5
+          color: white
+        }
+
+        svg {
+          position: absolute
+          top: 0; bottom: 0; left: 0; right: 0
+          height: 100%
+          width: 100%
+
+          rect {
+            fill: #D1C0FB
+            transform: translate(0, -50%)
+          }
+        }
+      }
+    }
+
+  }
+
+  footer {
+    min-height: 50px
+    padding: 8px
+    background: #222
+    display: flex
+    justify-content: flex-end
+
+    button {
+
+    }
+  }
+}
+
+@keyframes audioProcessingAnimation {
+  0% {
+  	background-position: 0 0;
+  }
+  100% {
+  	background-position: 50px 50px;
+  }
+}

@@ -45,5 +45,18 @@ module.exports = function (context) {
     }
   })
 
+  ipc.on('bg-create-torrent', (ev, id, filePath, hash) => {
+    var torrentPath = join(mediaPath, `${hash}.torrent`)
+    createTorrent(filePath, function (err, torrent) {
+      if (err) return ipc.send('bg-response', id, err)
+      fs.writeFile(torrentPath, torrent, function (err) {
+        if (err) return ipc.send('bg-response', id, err)
+        torrentClient.add(torrentPath, { path: mediaPath }, function (torrent) {
+          ipc.send('bg-response', id, null, torrent.magnetURI)
+        })
+      })
+    })
+  })
+
   ipc.send('ipcBackgroundReady', true)
 }

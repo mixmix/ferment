@@ -13,6 +13,7 @@ electron.ipcRenderer.on('bg-response', function (ev, id, ...args) {
 module.exports = function (context) {
   return {
     context,
+
     stream (torrentId, cb) {
       var id = seq++
       callbacks[id] = cb
@@ -20,6 +21,12 @@ module.exports = function (context) {
       return () => {
         electron.ipcRenderer.send('bg-release', id)
       }
+    },
+
+    createTorrent (path, hash, cb) {
+      var id = seq++
+      callbacks[id] = cb
+      electron.ipcRenderer.send('bg-create-torrent', id, path, hash)
     }
   }
 }
