@@ -23,7 +23,8 @@ It should also be possible to host your own server that allows people without th
 - [x] Sequencial feed playback
 - [x] API for adding file (transcode, analyse waveform)
 - [x] Upload interface [still needs more fields, and artwork]
-- [ ] Store artwork in blobstore, and retrieve again
+- [x] Connect to local peers and merge streams [currently requires intervention]
+- [x] Store artwork in blobstore, and retrieve again
 - [ ] Proper play/pause/loading buttons (nice try emoji)
 - [ ] Make Save / Download button work
 - [ ] User setup (choose username, title, location, bio, picture, banner)

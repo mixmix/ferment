@@ -19,6 +19,7 @@ module.exports = function (config) {
   }
 
   var mediaPath = config.mediaPath
+  var artworkPath = Value()
   var artworkInput = h('input', {type: 'file', accept: 'image/*'})
   var audioInput = h('input', {type: 'file', accept: 'audio/*'})
   var title = h('input -title', { placeholder: 'Choose a title' })
@@ -26,6 +27,7 @@ module.exports = function (config) {
   setTimeout(() => title.focus(), 50)
 
   var audioInfo = Value()
+  var artworkInfo = Value()
   var waitingToSave = Value(false)
   var processing = computed(audioInfo, (info) => info && info.processing)
   var overview = computed(audioInfo, (info) => info && info.overview)
@@ -63,9 +65,20 @@ module.exports = function (config) {
     }
   }
 
+  artworkInput.onchange = function () {
+    var file = artworkInput.files[0]
+    if (file) {
+      artworkPath.set(file.path)
+    }
+  }
+
   return h('AddAudioPost', [
     h('section', [
-      h('div.artwork', [
+      h('div.artwork', {
+        style: {
+          'background-image': computed(artworkPath, p => p ? `url('file://${p}')` : '')
+        }
+      }, [
         h('span', ['🖼 Choose Artwork...']), artworkInput
       ]),
       h('div.main', [
@@ -111,6 +124,18 @@ module.exports = function (config) {
       description: description.value
     })
 
+    if (artworkPath()) {
+      context.db.addBlob(artworkPath(), (err, hash) => {
+        if (err) throw err
+        item.artworkSrc = `blobstore:${hash}`
+        publish(item)
+      })
+    } else {
+      publish(item)
+    }
+  }
+
+  function publish (item) {
     console.log('publishing', item)
     context.db.publish(item, function (err) {
       if (err) throw err

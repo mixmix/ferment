@@ -17,6 +17,14 @@ module.exports = function (item) {
   var player = context.player
   var torrentStatus = TorrentStatus(item)
 
+  var url = computed(item.artworkSrc, (src) => {
+    if (src && src.startsWith('blobstore:')) {
+      return `http://localhost:${context.config.blobsPort}/${src.slice(10)}`
+    } else {
+      return src
+    }
+  })
+
   return h('AudioPost', {
     hooks: [ torrentStatus.hook ],
     classList: [
@@ -24,7 +32,7 @@ module.exports = function (item) {
     ]
   }, [
     h('div.artwork', { style: {
-      'background-image': computed(item.artworkSrc, (src) => `url("${src}")`)
+      'background-image': computed(url, (src) => src ? `url("${src}")` : '')
     }}),
     h('div.main', [
       h('div.title', [

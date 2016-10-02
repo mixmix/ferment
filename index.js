@@ -4,6 +4,8 @@ var openWindow = require('./lib/window')
 var createSbot = require('./lib/ssb-server')
 var serveBlobs = require('./lib/serve-blobs')
 var makeSingleInstance = require('./lib/make-single-instance')
+var pull = require('pull-stream')
+var pullFile = require('pull-file')
 
 var windows = {
   adders: new Set()
@@ -12,6 +14,15 @@ var windows = {
 makeSingleInstance(windows, openMainWindow)
 
 var context = setupContext('ferment')
+electron.ipcMain.on('add-blob', (ev, id, path, cb) => {
+  pull(
+    pullFile(path),
+    context.db.blobs.add((err, hash) => {
+      if (err) return ev.sender.send('response', id, err)
+      ev.sender.send('response', id, null, hash)
+    })
+  )
+})
 
 electron.app.on('ready', function () {
   setupIpc(windows)
