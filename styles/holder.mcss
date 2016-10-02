@@ -49,13 +49,24 @@ Holder {
   }
 
   div.bottom {
-    min-height: 60px
-    padding: 4px
+    position: relative
+    box-shadow: 0 0 3px #222
     background: #222
     align-items: center
     display: flex
+    padding: 5px
 
     audio {
+      color: #EEE
+
+      ::-webkit-media-controls-panel {
+        background: transparent
+      }
+
+      ::-webkit-media-controls-current-time-display {
+        color: inherit
+      }
+
       width: 100%
     }
   }
