@@ -38,6 +38,7 @@
     "insert-css": "^1.0.0",
     "micro-css": "^0.6.1",
     "mime-types": "^2.1.12",
+    "prettier-bytes": "^1.0.3",
     "pull-identify-filetype": "^1.1.0",
     "pull-reconnect": "0.0.3",
     "pull-stream": "^3.4.5",

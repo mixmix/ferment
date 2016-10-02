@@ -1,8 +1,10 @@
 var h = require('../lib/h')
+var Value = require('@mmckegg/mutant/value')
 var send = require('@mmckegg/mutant/send')
 var computed = require('@mmckegg/mutant/computed')
 var when = require('@mmckegg/mutant/when')
 var AudioOverview = require('./audio-overview')
+var prettyBytes = require('prettier-bytes')
 
 var playButtonIcons = {
   paused: '\u25B6',
@@ -13,8 +15,10 @@ var playButtonIcons = {
 module.exports = function (item) {
   var context = item.context
   var player = context.player
+  var torrentStatus = TorrentStatus(item)
 
   return h('AudioPost', {
+    hooks: [ torrentStatus.hook ],
     classList: [
       computed(item.state, (s) => `-${s}`)
     ]
@@ -49,10 +53,18 @@ module.exports = function (item) {
       h('div.options', [
         h('a.like', {href: '#'}, '💚 Like'),
         h('a.repost', {href: '#'}, '📡 Repost'),
-        h('a.download', {href: '#'}, '⬇️ Download')
+        h('a.download', {href: '#'}, '⬇️ Download'),
+        when(torrentStatus.downloading, h('span', [
+          h('strong', 'Downloading: '),
+          computed(torrentStatus.downloadProgress, percent), ' (', computed(torrentStatus.downloadSpeed, value => `${prettyBytes(value)}/s`), ')'
+        ]))
       ])
     ])
   ])
+}
+
+function percent (value) {
+  return Math.round(value * 100) + '%'
 }
 
 function SetPositionHook (item) {
@@ -81,4 +93,19 @@ function formatTime (value) {
   var minutes = Math.floor(value / 60)
   var seconds = Math.round(value % 60)
   return minutes + ':' + ('0' + seconds).slice(-2)
+}
+
+function TorrentStatus (item) {
+  var info = Value({})
+  return {
+    downloadProgress: computed(info, (x) => x.progress || 0),
+    downloadSpeed: computed(info, (x) => x.downloadSpeed || 0),
+    downloading: computed(info, (x) => x.progress !== null && x.progress < 1),
+    paused: computed(info, (x) => x.paused || false),
+    hook: function (element) {
+      if (item.context.background) {
+        return item.context.background.subscribeProgress(item.audioSrc(), info.set)
+      }
+    }
+  }
 }
