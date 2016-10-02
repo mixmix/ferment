@@ -21,6 +21,22 @@ button {
     background-color: #333 !important
   }
 
+  -stop {
+    border-color: #884949
+    background-color: #5D2524
+    text-shadow: 1px 1px 1px #000
+    color: white
+
+    :active {
+      background-color: #331F1F !important
+    }
+
+    :hover {
+      background-color: #6D3534
+      border-color: #B54C4C
+    }
+  }
+
   -save {
     border-color: #498849
     background-color: #255D24

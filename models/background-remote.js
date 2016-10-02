@@ -10,10 +10,8 @@ electron.ipcRenderer.on('bg-response', function (ev, id, ...args) {
   }
 })
 
-module.exports = function (context) {
+module.exports = function () {
   return {
-    context,
-
     stream (torrentId, cb) {
       var id = seq++
       callbacks[id] = cb

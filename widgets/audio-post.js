@@ -2,7 +2,7 @@ var h = require('../lib/h')
 var send = require('@mmckegg/mutant/send')
 var computed = require('@mmckegg/mutant/computed')
 var when = require('@mmckegg/mutant/when')
-var AudioOverview = require('../widgets/audio-overview')
+var AudioOverview = require('./audio-overview')
 
 var playButtonIcons = {
   paused: '\u25B6',

@@ -6,9 +6,9 @@ var getExt = require('path').extname
 var fs = require('fs')
 var ipc = electron.ipcRenderer
 
-module.exports = function (context) {
+module.exports = function (config) {
   var torrentClient = new WebTorrent()
-  var mediaPath = context.config.mediaPath
+  var mediaPath = config.mediaPath
   var releases = {}
 
   // start seeding

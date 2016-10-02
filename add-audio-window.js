@@ -1,21 +1,24 @@
-var h = require('../lib/h')
+var h = require('./lib/h')
 var electron = require('electron')
 var Path = require('path')
-var AudioOverview = require('../widgets/audio-overview')
+var AudioOverview = require('./widgets/audio-overview')
 var computed = require('@mmckegg/mutant/computed')
 var when = require('@mmckegg/mutant/when')
 var Value = require('@mmckegg/mutant/value')
-var convert = require('../lib/convert')
-var generateMeta = require('../lib/generate-meta')
-var shasum = require('../lib/shasum')
+var convert = require('./lib/convert')
+var generateMeta = require('./lib/generate-meta')
+var shasum = require('./lib/shasum')
 var fs = require('fs')
 var extend = require('xtend')
-var BackgroundRemote = require('../background-remote')
 
-module.exports = function (context) {
-  context.background = BackgroundRemote(context)
+module.exports = function (config) {
+  var context = {
+    config,
+    db: require('./lib/db')(config),
+    background: require('./models/background-remote')(config)
+  }
 
-  var mediaPath = context.config.mediaPath
+  var mediaPath = config.mediaPath
   var artworkInput = h('input', {type: 'file', accept: 'image/*'})
   var audioInput = h('input', {type: 'file', accept: 'audio/*'})
   var title = h('input -title', { placeholder: 'Choose a title' })
@@ -82,8 +85,8 @@ module.exports = function (context) {
     ]),
     h('footer', [
       when(waitingToSave, [
-        h('button -save', {'disabled': true}, ['Processing, please wait...']),
-        h('button -cancel', {'ev-click': cancelPost}, ['Cancel Post'])
+        h('button', {'disabled': true}, ['Processing, please wait...']),
+        h('button -stop', {'ev-click': cancelPost}, ['Cancel Post'])
       ], [
         h('button -save', {'ev-click': save}, ['Post to Feed']),
         h('button -cancel', {'ev-click': cancel}, ['Cancel'])
