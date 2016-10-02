@@ -91,7 +91,7 @@ function SetPositionHook (item) {
 
 function formatTime (value) {
   var minutes = Math.floor(value / 60)
-  var seconds = Math.round(value % 60)
+  var seconds = Math.floor(value % 60)
   return minutes + ':' + ('0' + seconds).slice(-2)
 }
 
