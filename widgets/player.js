@@ -36,9 +36,13 @@ function Player (context) {
 
         itemReleases.push(context.background.stream(item.audioSrc(), (err, url) => {
           if (err) throw err
+          var cuedNext = false
           audioElement.src = url
           audioElement.ontimeupdate = function (e) {
             item.position.set(e.target.currentTime)
+            if (!cuedNext && e.target.duration > 0 && e.target.currentTime > e.target.duration / 2) {
+              self.cueNext()
+            }
           }
           audioElement.onwaiting = () => item.state.set('waiting')
           audioElement.onplaying = () => item.state.set('playing')
@@ -60,6 +64,14 @@ function Player (context) {
       if (next) {
         next.position.set(0)
         self.togglePlay(next)
+      }
+    },
+
+    cueNext () {
+      var index = currentFeed.indexOf(currentItem.get())
+      var next = currentFeed.get(index + 1)
+      if (next) {
+        context.background.checkTorrent(next.audioSrc())
       }
     }
   }

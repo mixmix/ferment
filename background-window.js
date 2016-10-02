@@ -1,6 +1,7 @@
 var WebTorrent = require('webtorrent')
 var electron = require('electron')
 var createTorrent = require('create-torrent')
+var parseTorrent = require('parse-torrent')
 var join = require('path').join
 var getExt = require('path').extname
 var fs = require('fs')
@@ -23,7 +24,6 @@ module.exports = function (config) {
   var prioritizeReleases = []
   var paused = []
   var torrentStatuses = {}
-  var pendingSubscriptions = []
 
   startSeeding()
 
@@ -36,7 +36,6 @@ module.exports = function (config) {
 
     torrent.on('download', update)
     update()
-    checkPendingSubscriptions()
 
     function update () {
       status.set({
@@ -55,16 +54,23 @@ module.exports = function (config) {
   })
 
   ipc.on('bg-subscribe-progress', (ev, id, torrentId) => {
-    var torrent = torrentClient.get(torrentId)
-    if (torrent && torrent.infoHash) {
-      addWatcherSubscription(torrent.infoHash, id)
-    } else {
-      pendingSubscriptions.push([id, torrentId])
-    }
+    var torrent = parseTorrent(torrentId)
+    addWatcherSubscription(torrent.infoHash, id)
   })
 
   ipc.on('bg-stream-torrent', (ev, id, torrentId) => {
     unprioritize(true, () => {
+      var torrent = torrentClient.get(torrentId)
+      if (torrent) {
+        streamTorrent(id, torrentId)
+      } else {
+        addTorrent(torrentId, () => {
+          streamTorrent(id, torrentId)
+        })
+      }
+    })
+
+    function streamTorrent (id, torrentId) {
       var torrent = torrentClient.get(torrentId)
       var server = torrent.createServer()
       prioritize(torrentId)
@@ -77,7 +83,18 @@ module.exports = function (config) {
       releases[id] = () => {
         server.close()
       }
-    })
+    }
+  })
+
+  ipc.on('bg-check-torrent', (ev, id, torrentId) => {
+    var torrent = torrentClient.get(torrentId)
+    if (torrent) {
+      ipc.send('bg-response', id, null)
+    } else {
+      addTorrent(torrentId, (err) => {
+        ipc.send('bg-response', id, err)
+      })
+    }
   })
 
   ipc.on('bg-create-torrent', (ev, id, filePath, hash) => {
@@ -96,6 +113,14 @@ module.exports = function (config) {
   ipc.send('ipcBackgroundReady', true)
 
   // scoped
+
+  function addTorrent (torrentId, cb) {
+    torrentClient.add(torrentId, { path: mediaPath }, function (torrent) {
+      console.log('add torrent', torrent.infoHash)
+      var torrentPath = join(mediaPath, `${torrent.infoHash}.torrent`)
+      fs.writeFile(torrentPath, torrent.torrentFile, cb)
+    })
+  }
 
   function startSeeding () {
     fs.readdir(mediaPath, function (err, entries) {
@@ -151,17 +176,6 @@ module.exports = function (config) {
           unprioritize(true)
         }
       }))
-    }
-  }
-
-  function checkPendingSubscriptions () {
-    for (var i = pendingSubscriptions.length - 1; i >= 0; i--) {
-      var id = pendingSubscriptions[i][0]
-      var torrent = torrentClient.get(pendingSubscriptions[i][1])
-      if (torrent) {
-        addWatcherSubscription(torrent.infoHash, id)
-        pendingSubscriptions.splice(0, 1)
-      }
     }
   }
 

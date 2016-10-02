@@ -35,6 +35,12 @@ module.exports = function () {
       electron.ipcRenderer.send('bg-create-torrent', id, path, hash)
     },
 
+    checkTorrent (torrentId, cb) {
+      var id = seq++
+      callbacks[id] = cb
+      electron.ipcRenderer.send('bg-check-torrent', id, torrentId)
+    },
+
     subscribeProgress (torrentId, listener) {
       var id = seq++
       listeners[id] = listener
