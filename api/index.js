@@ -3,7 +3,7 @@ var MutantArray = require('@mmckegg/mutant/array')
 var Value = require('@mmckegg/mutant/value')
 var AudioPost = require('../models/audio-post')
 var electron = require('electron')
-var feedProcessor = require('./feed-processor')
+var Profiles = require('./profiles')
 
 var callbacks = {}
 electron.ipcRenderer.on('response', (ev, id, ...args) => {
@@ -19,29 +19,54 @@ module.exports = function (ssbClient) {
   var connectionStatus = Value()
   var windowId = Date.now()
   var seq = 0
-
-  //var patchworkdb = ssbClient.sublevel('ferment')
+  var profiles = null
 
   return {
     connectionStatus,
     getGlobalFeed (context) {
+      checkProfilesLoaded()
       var result = MutantArray()
+      var sync = false
+      var readStream = ssbClient.createFeedStream({live: true, reverse: true})
       pull(
-        ssbClient.createFeedStream({live: true}),
+        readStream,
         pull.drain(function (item) {
-          if (!item.sync) {
+          if (item.sync) {
+            sync = true
+          } else {
             if (item.value.content.type === 'ferment/audio') {
               var instance = itemCache.get(item.key)
               if (!instance) {
-                instance = AudioPost(context, item.value, { feedTitle: 'DESTROY WITH SCIENCE' })
+                instance = AudioPost(item.key, profiles.get(item.value.author))
+                instance.set(item.value.content)
                 itemCache.set(item.key, instance)
               }
-              result.insert(instance, 0)
+              if (sync) {
+                result.insert(instance, 0)
+              } else {
+                result.push(instance)
+              }
             }
           }
         })
       )
+      result.destroy = function () {
+        readStream.end()
+      }
       return result
+    },
+
+    setOwnDisplayName (name, cb) {
+      ssbClient.publish({
+        type: 'about',
+        about: ssbClient.id,
+        name: name
+      }, (err) => cb && cb(err))
+    },
+
+    getProfile (id) {
+      checkProfilesLoaded()
+      return profiles.get(id)
     },
 
     publish (content, cb) {
@@ -56,6 +81,13 @@ module.exports = function (ssbClient) {
       var id = `${windowId}-${seq++}`
       callbacks[id] = cb
       electron.ipcRenderer.send('add-blob', id, path)
+    }
+  }
+
+  // scoped
+  function checkProfilesLoaded () {
+    if (!profiles) {
+      profiles = Profiles(ssbClient)
     }
   }
 }

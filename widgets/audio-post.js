@@ -12,10 +12,9 @@ var playButtonIcons = {
   waiting: '📶'
 }
 
-module.exports = function (item) {
-  var context = item.context
+module.exports = function (context, item) {
   var player = context.player
-  var torrentStatus = TorrentStatus(item)
+  var torrentStatus = TorrentStatus(context, item)
 
   var url = computed(item.artworkSrc, (src) => {
     if (src && src.startsWith('blobstore:')) {
@@ -40,7 +39,7 @@ module.exports = function (item) {
           computed(item.state, (s) => playButtonIcons[s || 'paused'])
         ]),
         h('header', [
-          h('div.feedTitle', [item.feedTitle]),
+          h('div.feedTitle', [item.author.displayName]),
           h('div.title', [item.title])
         ])
       ]),
@@ -103,7 +102,7 @@ function formatTime (value) {
   return minutes + ':' + ('0' + seconds).slice(-2)
 }
 
-function TorrentStatus (item) {
+function TorrentStatus (context, item) {
   var info = Value({})
   return {
     downloadProgress: computed(info, (x) => x.progress || 0),
@@ -111,8 +110,8 @@ function TorrentStatus (item) {
     downloading: computed(info, (x) => x.progress !== null && x.progress < 1),
     paused: computed(info, (x) => x.paused || false),
     hook: function (element) {
-      if (item.context.background) {
-        return item.context.background.subscribeProgress(item.audioSrc(), info.set)
+      if (context.background) {
+        return context.background.subscribeProgress(item.audioSrc(), info.set)
       }
     }
   }

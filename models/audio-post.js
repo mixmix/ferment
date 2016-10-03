@@ -3,7 +3,7 @@ var Struct = require('@mmckegg/mutant/struct')
 
 module.exports = AudioPost
 
-function AudioPost (context, item, opts) {
+function AudioPost (id, author) {
   var result = Struct({
     title: Value(),
     description: Value(),
@@ -14,14 +14,10 @@ function AudioPost (context, item, opts) {
     artworkSrc: Value()
   })
 
-  result.context = context
-  result.feedTitle = Value(opts && opts.feedTitle || null)
+  result.id = id
+  result.author = author
   result.position = Value(0)
   result.state = Value()
-
-  if (item) {
-    result.set(item.content)
-  }
 
   return result
 }

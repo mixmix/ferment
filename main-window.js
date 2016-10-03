@@ -25,7 +25,7 @@ module.exports = function (client, config) {
     h('div.main', [
       h('Feed', [
         h('h1', 'Feed'),
-        MutantMap(feed, renderAudioPost)
+        MutantMap(feed, (item) => renderAudioPost(context, item))
       ])
     ]),
     h('div.bottom', [
