@@ -11,9 +11,23 @@ var windows = {
   adders: new Set()
 }
 
-makeSingleInstance(windows, openMainWindow)
+var context = null
+if (process.argv[2] === '--test-peer') {
+  // helpful for testing peers on a single machine
+  context = setupContext('ferment-peer', {
+    port: 43762
+  })
 
-var context = setupContext('ferment')
+  if (process.argv[3]) {
+    context.db.gossip.add(process.argv[3], 'local')
+  }
+} else {
+  makeSingleInstance(windows, openMainWindow)
+  context = setupContext('ferment')
+}
+
+console.log('address:', context.db.getAddress())
+
 electron.ipcMain.on('add-blob', (ev, id, path, cb) => {
   pull(
     pullFile(path),
@@ -100,8 +114,8 @@ function startBackgroundProcess () {
   })
 }
 
-function setupContext (appName) {
-  var ssbConfig = require('./lib/ssb-config')(appName)
+function setupContext (appName, opts) {
+  var ssbConfig = require('./lib/ssb-config')(appName, opts)
   var context = {
     db: createSbot(ssbConfig),
     config: ssbConfig
