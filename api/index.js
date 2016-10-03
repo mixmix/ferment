@@ -1,10 +1,9 @@
-var createClient = require('ssb-client')
 var pull = require('pull-stream')
 var MutantArray = require('@mmckegg/mutant/array')
 var Value = require('@mmckegg/mutant/value')
 var AudioPost = require('../models/audio-post')
-var Reconnect = require('pull-reconnect')
 var electron = require('electron')
+var feedProcessor = require('./feed-processor')
 
 var callbacks = {}
 electron.ipcRenderer.on('response', (ev, id, ...args) => {
@@ -15,40 +14,20 @@ electron.ipcRenderer.on('response', (ev, id, ...args) => {
   }
 })
 
-module.exports = function (config) {
+module.exports = function (ssbClient) {
   var itemCache = new Map()
   var connectionStatus = Value()
   var windowId = Date.now()
   var seq = 0
 
-  var ssbClient = null
-
-  var rec = Reconnect(function (isConn) {
-    createClient(config.keys, config, (err, client) => {
-      if (err) return notify(err)
-      ssbClient = client
-      ssbClient.on('closed', function () {
-        ssbClient = null
-        notify(new Error('closed'))
-      })
-      notify(null, true)
-    })
-
-    // scoped
-    function notify (err, value) {
-      isConn(err)
-      connectionStatus.set(value || err)
-    }
-  })
-
-  var createFeedStream = rec.source(opts => ssbClient.createFeedStream(opts))
+  //var patchworkdb = ssbClient.sublevel('ferment')
 
   return {
     connectionStatus,
     getGlobalFeed (context) {
       var result = MutantArray()
       pull(
-        createFeedStream({live: true}),
+        ssbClient.createFeedStream({live: true}),
         pull.drain(function (item) {
           if (!item.sync) {
             if (item.value.content.type === 'ferment/audio') {
@@ -64,13 +43,14 @@ module.exports = function (config) {
       )
       return result
     },
-    publish: rec.async(function (content, cb) {
+
+    publish (content, cb) {
       ssbClient.publish(content, function (err, msg) {
         if (err) console.error(err)
         else if (!cb) console.log(msg)
         cb && cb(err, msg)
       })
-    }),
+    },
 
     addBlob (path, cb) {
       var id = `${windowId}-${seq++}`

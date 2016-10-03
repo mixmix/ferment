@@ -13,10 +13,10 @@ var fs = require('fs')
 var extend = require('xtend')
 var sanitizeFileName = require('sanitize-filename')
 
-module.exports = function (config) {
+module.exports = function (client, config) {
   var context = {
     config,
-    api: require('./api')(config),
+    api: require('./api')(client, config),
     background: require('./models/background-remote')(config)
   }
 

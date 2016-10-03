@@ -16,7 +16,7 @@ window.addEventListener('error', function (e) {
   console.error(e.error.stack || 'Uncaught ' + e.error)
 })
 
-module.exports = function (config) {
+module.exports = function (client, config) {
   var torrentClient = new WebTorrent()
   var mediaPath = config.mediaPath
   var releases = {}

@@ -5,8 +5,8 @@ var electron = require('electron')
 var Player = require('./widgets/player')
 var renderAudioPost = require('./widgets/audio-post')
 
-module.exports = function (config) {
-  var api = require('./api')(config)
+module.exports = function (client, config) {
+  var api = require('./api')(client, config)
   var background = require('./models/background-remote')(config)
 
   var context = { config, api, background }

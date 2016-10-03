@@ -41,7 +41,6 @@
     "prettier-bytes": "^1.0.3",
     "pull-file": "^1.0.0",
     "pull-identify-filetype": "^1.1.0",
-    "pull-reconnect": "0.0.3",
     "pull-stream": "^3.4.5",
     "sanitize-filename": "^1.6.1",
     "scuttlebot": "~8.7.2",
