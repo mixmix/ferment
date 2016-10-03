@@ -55,7 +55,9 @@ module.exports = function (client, config) {
     }
   })
 
-  return h('MainWindow', [
+  return h('MainWindow', {
+    classList: [ '-' + process.platform ]
+  }, [
     h('div.top', [
       h('span.history', [
         h('a', {

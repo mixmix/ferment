@@ -3,6 +3,18 @@ MainWindow {
   display: flex
   flex-direction: column
 
+  -darwin {
+    div.top {
+      padding-left: 70px
+    }
+  }
+
+  -win32, -linux {
+    div.top {
+      padding-right: 70px
+    }
+  }
+
   div.top {
     -webkit-app-region: drag
     display: flex
@@ -11,7 +23,6 @@ MainWindow {
     border-bottom: 2px solid #222
     box-shadow: 0 0 3px #222
     position: relative
-    padding-left: 70px
 
     span {
       a {
