@@ -16,7 +16,7 @@ var sanitizeFileName = require('sanitize-filename')
 module.exports = function (config) {
   var context = {
     config,
-    db: require('./lib/db')(config),
+    api: require('./api')(config),
     background: require('./models/background-remote')(config)
   }
 
@@ -151,7 +151,7 @@ module.exports = function (config) {
     }), function (err, item) {
       if (err) throw err
       if (artworkPath()) {
-        context.db.addBlob(artworkPath(), (err, hash) => {
+        context.api.addBlob(artworkPath(), (err, hash) => {
           if (err) throw err
           console.log('added blob', hash)
           item.artworkSrc = `blobstore:${hash}`
@@ -203,7 +203,7 @@ module.exports = function (config) {
 
   function publish (item) {
     console.log('publishing', item)
-    context.db.publish(item, function (err) {
+    context.api.publish(item, function (err) {
       if (err) throw err
       var window = electron.remote.getCurrentWindow()
       window.close()

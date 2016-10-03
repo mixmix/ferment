@@ -6,13 +6,13 @@ var Player = require('./widgets/player')
 var renderAudioPost = require('./widgets/audio-post')
 
 module.exports = function (config) {
-  var db = require('./lib/db')(config)
+  var api = require('./api')(config)
   var background = require('./models/background-remote')(config)
 
-  var context = { config, db, background }
+  var context = { config, api, background }
   var player = context.player = Player(context)
 
-  var feed = db.getGlobalFeed(context, {feedTitle: 'DESTROY WITH SCIENCE'})
+  var feed = api.getGlobalFeed(context, {feedTitle: 'DESTROY WITH SCIENCE'})
   player.currentFeed.set(feed)
 
   return h('Holder', [

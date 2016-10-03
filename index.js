@@ -20,19 +20,19 @@ if (process.argv[2] === '--test-peer') {
   })
 
   if (process.argv[3]) {
-    context.db.gossip.add(process.argv[3], 'local')
+    context.sbot.gossip.add(process.argv[3], 'local')
   }
 } else {
   makeSingleInstance(windows, openMainWindow)
   context = setupContext('ferment')
 }
 
-console.log('address:', context.db.getAddress())
+console.log('address:', context.sbot.getAddress())
 
 electron.ipcMain.on('add-blob', (ev, id, path, cb) => {
   pull(
     pullFile(path),
-    context.db.blobs.add((err, hash) => {
+    context.sbot.blobs.add((err, hash) => {
       if (err) return ev.sender.send('response', id, err)
       ev.sender.send('response', id, null, hash)
     })
@@ -118,11 +118,11 @@ function startBackgroundProcess () {
 function setupContext (appName, opts) {
   var ssbConfig = require('./lib/ssb-config')(appName, opts)
   var context = {
-    db: createSbot(ssbConfig),
+    sbot: createSbot(ssbConfig),
     config: ssbConfig
   }
 
-  ssbConfig.manifest = context.db.getManifest()
+  ssbConfig.manifest = context.sbot.getManifest()
   serveBlobs(context)
 
   return context
