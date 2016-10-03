@@ -73,7 +73,7 @@ function openMainWindow () {
 
 function openAddWindow () {
   var window = openWindow(context, Path.join(__dirname, 'add-audio-window.js'), {
-    // parent: windows.main,
+    parent: windows.main,
     show: true,
     width: 850,
     height: 350,
@@ -86,10 +86,6 @@ function openAddWindow () {
     backgroundColor: '#444',
     acceptFirstMouse: true
   })
-
-  // if (windows.main) {
-  //   window.setParentWindow(windows.main)
-  // }
 
   windows.adders.add(window)
 
