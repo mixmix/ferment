@@ -43,6 +43,7 @@
     "pull-identify-filetype": "^1.1.0",
     "pull-reconnect": "0.0.3",
     "pull-stream": "^3.4.5",
+    "sanitize-filename": "^1.6.1",
     "scuttlebot": "~8.7.2",
     "ssb-blobs": "~0.1.6",
     "ssb-client": "~4.1.0",

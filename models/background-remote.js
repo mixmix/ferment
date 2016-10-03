@@ -29,10 +29,10 @@ module.exports = function () {
       }
     },
 
-    createTorrent (path, hash, cb) {
+    seedTorrent (infoHash, cb) {
       var id = seq++
       callbacks[id] = cb
-      electron.ipcRenderer.send('bg-create-torrent', id, path, hash)
+      electron.ipcRenderer.send('bg-seed-torrent', id, infoHash)
     },
 
     checkTorrent (torrentId, cb) {

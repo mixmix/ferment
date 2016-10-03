@@ -2,7 +2,7 @@ var WebTorrent = require('webtorrent')
 var electron = require('electron')
 var createTorrent = require('create-torrent')
 var parseTorrent = require('parse-torrent')
-var join = require('path').join
+var Path = require('path')
 var getExt = require('path').extname
 var fs = require('fs')
 var ipc = electron.ipcRenderer
@@ -97,27 +97,39 @@ module.exports = function (config) {
     }
   })
 
-  ipc.on('bg-create-torrent', (ev, id, filePath, hash) => {
-    var torrentPath = join(mediaPath, `${hash}.torrent`)
-    createTorrent(filePath, function (err, torrent) {
-      if (err) return ipc.send('bg-response', id, err)
-      fs.writeFile(torrentPath, torrent, function (err) {
-        if (err) return ipc.send('bg-response', id, err)
-        torrentClient.add(torrentPath, { path: mediaPath }, function (torrent) {
-          ipc.send('bg-response', id, null, torrent.magnetURI)
-        })
+  ipc.on('bg-seed-torrent', (ev, id, infoHash) => {
+    var torrent = torrentClient.get(infoHash)
+    if (torrent) {
+      ipc.send('bg-response', id, null, torrent.magnetURI)
+    } else {
+      torrentClient.add(getTorrentPath(infoHash), {
+        path: getTorrentDataPath(infoHash)
+      }, function (torrent) {
+        ipc.send('bg-response', id, null, torrent.magnetURI)
       })
-    })
+    }
   })
 
   ipc.send('ipcBackgroundReady', true)
 
   // scoped
 
+  function getTorrentPath (infoHash) {
+    return `${getTorrentDataPath(infoHash)}.torrent`
+  }
+
+  function getTorrentDataPath (infoHash) {
+    return Path.join(mediaPath, `${infoHash}`)
+  }
+
   function addTorrent (torrentId, cb) {
-    torrentClient.add(torrentId, { path: mediaPath }, function (torrent) {
+    var torrent = parseTorrent(torrentId)
+    var torrentPath = getTorrentPath(torrent.infoHash)
+
+    torrentClient.add(torrent, {
+      path: getTorrentDataPath(torrent.infoHash)
+    }, function (torrent) {
       console.log('add torrent', torrent.infoHash)
-      var torrentPath = join(mediaPath, `${torrent.infoHash}.torrent`)
       fs.writeFile(torrentPath, torrent.torrentFile, cb)
     })
   }
@@ -127,7 +139,9 @@ module.exports = function (config) {
       if (err) throw err
       entries.forEach((name) => {
         if (getExt(name) === '.torrent') {
-          torrentClient.add(join(mediaPath, name), { path: mediaPath }, (torrent) => {
+          torrentClient.add(Path.join(mediaPath, name), {
+            path: getTorrentDataPath(Path.basename(name, '.torrent'))
+          }, (torrent) => {
             console.log('seeding', name)
           })
         }

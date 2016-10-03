@@ -7,9 +7,11 @@ var when = require('@mmckegg/mutant/when')
 var Value = require('@mmckegg/mutant/value')
 var convert = require('./lib/convert')
 var generateMeta = require('./lib/generate-meta')
-var shasum = require('./lib/shasum')
+var parseTorrentFile = require('parse-torrent-file')
+var createTorrent = require('create-torrent')
 var fs = require('fs')
 var extend = require('xtend')
+var sanitizeFileName = require('sanitize-filename')
 
 module.exports = function (config) {
   var context = {
@@ -27,8 +29,8 @@ module.exports = function (config) {
   setTimeout(() => title.focus(), 50)
 
   var audioInfo = Value()
-  var artworkInfo = Value()
   var waitingToSave = Value(false)
+  var publishing = Value(false)
   var processing = computed(audioInfo, (info) => info && info.processing)
   var overview = computed(audioInfo, (info) => info && info.overview)
 
@@ -56,7 +58,16 @@ module.exports = function (config) {
 
       cancelLastImport && cancelLastImport()
       cancelLastImport = prepareAudio(file.path, function (err, info) {
-        if (err) throw err
+        if (err) {
+          electron.remote.dialog.showMessageBox(electron.remote.getCurrentWindow(), {
+            type: 'error',
+            title: 'Error',
+            buttons: ['OK'],
+            message: 'An error occured while processing audio file.'
+          })
+          audioInfo.set({error: err})
+          throw err
+        }
         audioInfo.set(info)
         if (waitingToSave()) {
           save()
@@ -97,13 +108,16 @@ module.exports = function (config) {
       ])
     ]),
     h('footer', [
-      when(waitingToSave, [
-        h('button', {'disabled': true}, ['Processing, please wait...']),
-        h('button -stop', {'ev-click': cancelPost}, ['Cancel Post'])
-      ], [
-        h('button -save', {'ev-click': save}, ['Post to Feed']),
-        h('button -cancel', {'ev-click': cancel}, ['Cancel'])
-      ])
+      when(publishing,
+        h('button', {'disabled': true}, ['Publishing...']),
+        when(waitingToSave, [
+          h('button', {'disabled': true}, ['Processing, please wait...']),
+          h('button -stop', {'ev-click': cancelPost}, ['Cancel Post'])
+        ], [
+          h('button -save', {'ev-click': save}, ['Publish Audio']),
+          h('button -cancel', {'ev-click': cancel}, ['Cancel'])
+        ])
+      )
     ])
   ])
 
@@ -114,25 +128,77 @@ module.exports = function (config) {
   }
 
   function save () {
-    if (!audioInfo() || audioInfo().processing) {
-      waitingToSave.set(true)
+    if (audioInfo() && !audioInfo().error) {
+      if (audioInfo().processing) {
+        waitingToSave.set(true)
+        return
+      }
+    } else {
+      electron.remote.dialog.showMessageBox(electron.remote.getCurrentWindow(), {
+        type: 'info',
+        title: 'Cannot Publish',
+        buttons: ['OK'],
+        message: 'You need to choose an audio file before publishing.'
+      })
       return
     }
-    var item = extend(audioInfo(), {
+
+    publishing.set(true)
+    commitAndSeed(extend(audioInfo(), {
       type: 'ferment/audio',
       title: title.value,
       description: description.value
+    }), function (err, item) {
+      if (err) throw err
+      if (artworkPath()) {
+        context.db.addBlob(artworkPath(), (err, hash) => {
+          if (err) throw err
+          console.log('added blob', hash)
+          item.artworkSrc = `blobstore:${hash}`
+          publish(item)
+        })
+      } else {
+        publish(item)
+      }
+    })
+  }
+
+  function commitAndSeed (info, cb) {
+    var tempDir = info.tempDir
+    var tempFile = Path.join(tempDir, info.fileName)
+    var newFileName = getFileName(info)
+    var renamed = Path.join(tempDir, newFileName)
+
+    info = extend(info, {
+      fileName: newFileName
     })
 
-    if (artworkPath()) {
-      context.db.addBlob(artworkPath(), (err, hash) => {
-        if (err) throw err
-        item.artworkSrc = `blobstore:${hash}`
-        publish(item)
+    delete info.tempDir
+
+    console.log('renaming', tempFile, 'to', renamed)
+    fs.rename(tempFile, renamed, function (err) {
+      if (err) throw err
+      createTorrent(renamed, function (err, torrentFile) {
+        if (err) return cb(err)
+        var torrent = parseTorrentFile(torrentFile)
+        var torrentPath = Path.join(mediaPath, `${torrent.infoHash}.torrent`)
+        var finalPath = Path.join(mediaPath, `${torrent.infoHash}`)
+        console.log('created torrent', torrentPath)
+
+        fs.rename(audioInfo().tempDir, finalPath, (err) => {
+          if (err) return cb(err)
+          fs.writeFile(torrentPath, torrentFile, (err) => {
+            if (err) return cb(err)
+            context.background.seedTorrent(torrent.infoHash, function (err, magnetURI) {
+              if (err) throw err
+              console.log('seeding torrent', magnetURI)
+              info.audioSrc = magnetURI
+              cb(null, info)
+            })
+          })
+        })
       })
-    } else {
-      publish(item)
-    }
+    })
   }
 
   function publish (item) {
@@ -151,31 +217,23 @@ module.exports = function (config) {
 
   function prepareAudio (path, cb) {
     var cancelled = false
+
     generateMeta(path, function (err, meta) {
       if (cancelled) return
-      if (err) throw err
+      if (err) return cb && cb(err)
       console.log('generated meta', meta)
-      var toPath = Path.join(mediaPath, `importing-${Date.now()}.ogg`)
-      convert(path, toPath, function (err) {
-        if (cancelled) return
-        if (err) throw err
-        console.log('converted to ogg')
-        shasum(toPath, function (err, hash) {
+      var tempDir = Path.join(mediaPath, `importing-${Date.now()}`)
+      fs.mkdir(tempDir, function (err) {
+        if (err) return cb && cb(err)
+        var fileName = `${Path.basename(path)}.ogg`
+        var toPath = Path.join(tempDir, fileName)
+        convert(path, toPath, function (err) {
           if (cancelled) return
-          if (err) throw err
-          var finalPath = Path.join(mediaPath, `${hash}.ogg`)
-          console.log('generate hash', hash)
-          fs.rename(toPath, finalPath, function (err) {
-            if (cancelled) return
-            if (err) throw err
-            context.background.createTorrent(finalPath, hash, function (err, magnetURI) {
-              if (cancelled) return
-              if (err) throw err
-              cb(null, extend({
-                audioSrc: magnetURI
-              }, meta))
-            })
-          })
+          if (err) return cb && cb(err)
+          console.log('converted to ogg')
+          cb(null, extend(meta, {
+            fileName, tempDir
+          }))
         })
       })
     })
@@ -184,4 +242,8 @@ module.exports = function (config) {
       cancelled = true
     }
   }
+}
+function getFileName (audioInfo) {
+  var ext = Path.extname(audioInfo.fileName)
+  return `${sanitizeFileName(audioInfo.title.trim()) || 'audio'}${ext}`
 }
