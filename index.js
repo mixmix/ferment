@@ -55,6 +55,7 @@ electron.ipcMain.on('open-edit-profile-window', (ev, data) => openEditProfileWin
 function openMainWindow () {
   if (!windows.main) {
     windows.main = openWindow(context, Path.join(__dirname, 'main-window.js'), {
+      minWidth: 800,
       width: 1024,
       height: 768,
       titleBarStyle: 'hidden-inset',
