@@ -46,7 +46,7 @@ module.exports = function (client, config) {
   audioInput.onchange = function () {
     var file = audioInput.files[0]
     if (file) {
-      if (!description.value || description.value === lastAutoTitle) {
+      if (!title.value || title.value === lastAutoTitle) {
         var fileName = file.name
         var ext = Path.extname(fileName)
         var base = Path.basename(fileName, ext)
