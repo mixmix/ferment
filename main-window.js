@@ -11,15 +11,24 @@ module.exports = function (client, config) {
 
   var context = { config, api, background }
   var player = context.player = Player(context)
+  var profile = api.getOwnProfile()
+
+  api.onProfilesLoaded(() => {
+    if (!profile.displayName()) {
+      // prompt use to set up profile the first time they open app
+      openEditProfileWindow()
+    }
+  })
 
   var feed = api.getGlobalFeed(context, {feedTitle: 'DESTROY WITH SCIENCE'})
   player.currentFeed.set(feed)
 
-  return h('Holder', [
+  return h('MainWindow', [
     h('div.top', [
       h('span.appTitle', ['Ferment']),
       h('span', [
-        h('a.upload', {href: '#', 'ev-click': openAddWindow}, ['+ Add Audio'])
+        h('a -profile', {href: '#', 'ev-click': openEditProfileWindow}, ['Edit Profile']),
+        h('a -add', {href: '#', 'ev-click': openAddWindow}, ['+ Add Audio'])
       ])
     ]),
     h('div.main', [
@@ -32,6 +41,15 @@ module.exports = function (client, config) {
       player.audioElement
     ])
   ])
+
+  // scoped
+
+  function openEditProfileWindow () {
+    electron.ipcRenderer.send('open-edit-profile-window', {
+      profile: profile.byMe(),
+      id: api.id
+    })
+  }
 }
 
 function openAddWindow () {

@@ -14,16 +14,15 @@ electron.ipcRenderer.on('response', (ev, id, ...args) => {
   }
 })
 
-module.exports = function (ssbClient) {
+module.exports = function (ssbClient, config) {
   var itemCache = new Map()
-  var connectionStatus = Value()
   var windowId = Date.now()
   var seq = 0
   var profiles = null
 
   return {
-    connectionStatus,
-    getGlobalFeed (context) {
+    id: ssbClient.id,
+    getGlobalFeed () {
       checkProfilesLoaded()
       var result = MutantArray()
       var sync = false
@@ -64,9 +63,19 @@ module.exports = function (ssbClient) {
       }, (err) => cb && cb(err))
     },
 
+    onProfilesLoaded (listener) {
+      checkProfilesLoaded()
+      profiles.onLoaded(listener)
+    },
+
     getProfile (id) {
       checkProfilesLoaded()
       return profiles.get(id)
+    },
+
+    getOwnProfile () {
+      checkProfilesLoaded()
+      return profiles.get(ssbClient.id)
     },
 
     publish (content, cb) {
@@ -81,6 +90,10 @@ module.exports = function (ssbClient) {
       var id = `${windowId}-${seq++}`
       callbacks[id] = cb
       electron.ipcRenderer.send('add-blob', id, path)
+    },
+
+    getBlobUrl (hash) {
+      return `http://localhost:${config.blobsPort}/${hash}`
     }
   }
 

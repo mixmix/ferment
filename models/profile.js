@@ -1,4 +1,3 @@
-var Value = require('@mmckegg/mutant/value')
 var Struct = require('@mmckegg/mutant/struct')
 var MutantDict = require('@mmckegg/mutant/dict')
 var MutantArray = require('@mmckegg/mutant/array')
@@ -7,23 +6,15 @@ var mlib = require('ssb-msgs')
 
 module.exports = function (id, myId) {
   var obj = Struct({
-    self: Struct({
-      displayName: Value(),
-      image: Value()
-    }),
-
-    byMe: Struct({
-      displayName: Value(),
-      image: Value()
-    }),
-
-    displayNames: MutantDict(),
-    images: MutantDict()
+    displayNames: SocialValue(),
+    images: SocialValue(),
+    descriptions: SocialValue()
   })
 
   obj.id = id
   obj.self = Assigned(obj, id)
   obj.byMe = Assigned(obj, myId)
+  obj.description = computed([obj.self.description, obj.byMe.description, obj.descriptions], getSocialValue, { nextTick: true })
   obj.displayName = computed([obj.self.displayName, obj.byMe.displayName, obj.displayNames], getSocialValue, { nextTick: true })
   obj.image = computed([obj.self.image, obj.byMe.image, obj.images], getSocialValue, { nextTick: true })
   obj.updateFrom = updateFrom.bind(null, obj)
@@ -33,17 +24,10 @@ module.exports = function (id, myId) {
 
 function Assigned (profile, id) {
   return Struct({
-    displayName: computed([profile.displayNames, id], valueAssignedBy, { nextTick: true }),
-    image: computed([profile.images, id], valueAssignedBy, { nextTick: true })
+    displayName: profile.displayNames.valueBy(id),
+    description: profile.descriptions.valueBy(id),
+    image: profile.images.valueBy(id)
   })
-}
-
-function valueAssignedBy (assignments, id) {
-  for (var k in assignments) {
-    if (assignments[k].includes(id)) {
-      return k
-    }
-  }
 }
 
 function updateFrom (profile, sourceId, msg) {
@@ -52,44 +36,19 @@ function updateFrom (profile, sourceId, msg) {
   // name: a non-empty string
   if (nonEmptyStr(c.name)) {
     var safeName = makeNameSafe(c.name)
-
-    // remove old assignment, if it exists
-    profile.displayNames.keys().forEach((name) => {
-      var currentName = profile.displayNames.get(name)
-      currentName.delete(sourceId)
-      if (!currentName.getLength()) {
-        profile.displayNames.delete(name)
-      }
-    })
-
-    // add new assignment
-    if (!profile.displayNames.get(safeName)) {
-      profile.displayNames.put(safeName, MutantArray())
-    }
-    profile.displayNames.get(safeName).push(sourceId)
+    profile.displayNames.assignValue(sourceId, safeName)
   }
 
   // image: link to image
   if ('image' in c) {
     var imageLink = mlib.link(c.image, 'blob')
     if (imageLink) {
-      // remove old assignment, if it exists
-
-      profile.images.keys().forEach((blobId) => {
-        var currentBlob = profile.displayNames.get(blobId)
-        currentBlob.delete(sourceId)
-        if (!currentBlob.getLength()) {
-          profile.displayNames.delete(blobId)
-        }
-      })
-
-      // add new assignment
-      profile.self.image.set(imageLink)
-      if (!profile.images.get(imageLink)) {
-        profile.displayNames.put(imageLink, MutantArray())
-      }
-      profile.displayNames.get(imageLink).push(sourceId)
+      profile.images.assignValue(sourceId, imageLink.link)
     }
+  }
+
+  if ('description' in c) {
+    profile.descriptions.assignValue(sourceId, c.description)
   }
 }
 
@@ -123,4 +82,39 @@ function makeNameSafe (str) {
 
 function nonEmptyStr (str) {
   return (typeof str === 'string' && !!('' + str).trim())
+}
+
+function SocialValue () {
+  var result = MutantDict()
+  result.assignValue = assignValue.bind(null, result)
+  result.valueBy = getValueBy.bind(null, result)
+  return result
+}
+
+function assignValue (dict, assignerId, value) {
+  dict.keys().forEach((v) => {
+    var current = dict.get(v)
+    current.delete(assignerId)
+    if (!current.getLength()) {
+      dict.delete(v)
+    }
+  })
+
+  // add new assignment
+  if (!dict.get(value)) {
+    dict.put(value, MutantArray())
+  }
+  dict.get(value).push(assignerId)
+}
+
+function getValueBy (dict, assignerId) {
+  return computed([dict, assignerId], valueAssignedBy, { nextTick: true })
+}
+
+function valueAssignedBy (assignments, id) {
+  for (var k in assignments) {
+    if (assignments[k].includes(id)) {
+      return k
+    }
+  }
 }

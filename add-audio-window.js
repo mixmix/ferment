@@ -22,9 +22,14 @@ module.exports = function (client, config) {
 
   var mediaPath = config.mediaPath
   var artworkPath = Value()
+
   var artworkInput = h('input', {type: 'file', accept: 'image/*'})
   var audioInput = h('input', {type: 'file', accept: 'audio/*'})
   var title = h('input -title', { placeholder: 'Choose a title' })
+  var description = h('textarea -description', {
+    rows: 5,
+    placeholder: 'Describe your audio'
+  })
 
   setTimeout(() => title.focus(), 50)
 
@@ -33,11 +38,6 @@ module.exports = function (client, config) {
   var publishing = Value(false)
   var processing = computed(audioInfo, (info) => info && info.processing)
   var overview = computed(audioInfo, (info) => info && info.overview)
-
-  var description = h('textarea -description', {
-    rows: 5,
-    placeholder: 'Describe your audio'
-  })
 
   var audioSvg = AudioOverview(overview, 600, 100)
   var lastAutoTitle = title.value
@@ -83,8 +83,8 @@ module.exports = function (client, config) {
     }
   }
 
-  return h('AddAudioPost', [
-    h('section', [
+  return h('Dialog', [
+    h('section AddAudioPost', [
       h('div.artwork', {
         style: {
           'background-image': computed(artworkPath, p => p ? `url('file://${p}')` : '')

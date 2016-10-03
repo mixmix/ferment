@@ -45,7 +45,7 @@ module.exports = function (context, item) {
       ]),
       h('div.display', {
         hooks: [
-          SetPositionHook(item)
+          SetPositionHook(context, item)
         ]
       }, [
         AudioOverview(item.overview, 600, 100),
@@ -74,7 +74,7 @@ function percent (value) {
   return Math.round(value * 100) + '%'
 }
 
-function SetPositionHook (item) {
+function SetPositionHook (context, item) {
   return function (element) {
     element.onmousemove = element.onmousedown = function (ev) {
       if (ev.buttons && ev.button === 0) {
@@ -89,8 +89,8 @@ function SetPositionHook (item) {
   }
 
   function setPosition (position) {
-    if (item.context.player.currentItem.get() === item) {
-      item.context.player.audioElement.currentTime = position
+    if (context.player.currentItem.get() === item) {
+      context.player.audioElement.currentTime = position
     }
     item.position.set(position)
   }

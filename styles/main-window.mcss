@@ -1,4 +1,4 @@
-Holder {
+MainWindow {
   height: 100%
   display: flex
   flex-direction: column
@@ -15,18 +15,35 @@ Holder {
 
     span {
       a {
-        padding: 2px 5px
+        padding: 2px 8px
         border: 2px solid #505050
         border-radius: 4px
         background: #313030
         color: #C5C5C5
         font-size: 120%
         cursor: pointer
+        margin-left: 5px
 
         :hover {
           text-decoration: none
           color: white
           border-color: #888
+        }
+
+        -add {
+          border-color: #498849
+          background-color: #255D24
+          text-shadow: 1px 1px 1px #000
+          color: white
+
+          :active {
+            background-color: #1F331F !important
+          }
+
+          :hover {
+            background-color: #356D34
+            border-color: #4CB54C
+          }
         }
       }
     }

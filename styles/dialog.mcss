@@ -1,0 +1,22 @@
+Dialog {
+  display: flex
+  flex-direction: column
+  height: 100%
+
+  section {
+    flex: 1
+    display: flex
+  }
+
+  footer {
+    min-height: 50px
+    padding: 8px
+    background: #222
+    display: flex
+    justify-content: flex-end
+
+    button {
+      margin-left: 10px
+    }
+  }
+}

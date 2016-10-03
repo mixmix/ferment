@@ -9,7 +9,7 @@ var pullFile = require('pull-file')
 var Path = require('path')
 
 var windows = {
-  adders: new Set()
+  dialogs: new Set()
 }
 
 var context = null
@@ -50,6 +50,7 @@ electron.app.on('activate', function (e) {
 })
 
 electron.ipcMain.on('open-add-window', openAddWindow)
+electron.ipcMain.on('open-edit-profile-window', (ev, data) => openEditProfileWindow(data))
 
 function openMainWindow () {
   if (!windows.main) {
@@ -65,6 +66,7 @@ function openMainWindow () {
         experimentalFeatures: true
       }
     })
+    windows.main.setSheetOffset(40)
     windows.main.on('closed', function () {
       windows.main = null
     })
@@ -87,10 +89,35 @@ function openAddWindow () {
     acceptFirstMouse: true
   })
 
-  windows.adders.add(window)
+  windows.dialogs.add(window)
 
   window.on('closed', function () {
-    windows.adders.delete(window)
+    windows.dialogs.delete(window)
+  })
+}
+
+function openEditProfileWindow (opts) {
+  var window = openWindow(context, Path.join(__dirname, 'edit-profile-window.js'), {
+    parent: windows.main,
+    modal: true,
+    show: true,
+    width: 800,
+    height: 300,
+    useContentSize: true,
+    maximizable: false,
+    fullscreenable: false,
+    skipTaskbar: true,
+    resizable: false,
+    title: 'Edit Profile',
+    backgroundColor: '#444',
+    acceptFirstMouse: true,
+    data: opts
+  })
+
+  windows.dialogs.add(window)
+
+  window.on('closed', function () {
+    windows.dialogs.delete(window)
   })
 }
 
