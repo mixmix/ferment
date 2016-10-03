@@ -85,6 +85,7 @@ module.exports = function (client, config) {
           classList: [ computed(currentView, (x) => x[0] === 'profile' && x[1] === api.id ? '-selected' : null) ]
         }, '😀'),
         h('a -profile', {href: '#', 'ev-click': openEditProfileWindow}, ['Edit Profile']),
+        h('a -pub', {href: '#', 'ev-click': openJoinPubWindow}, ['Join Pub']),
         h('a -add', {href: '#', 'ev-click': openAddWindow}, ['+ Add Audio'])
       ])
     ]),
@@ -121,6 +122,10 @@ module.exports = function (client, config) {
       profile: profile.byMe(),
       id: api.id
     })
+  }
+
+  function openJoinPubWindow () {
+
   }
 }
 

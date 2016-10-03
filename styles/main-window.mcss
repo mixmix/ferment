@@ -51,6 +51,22 @@ MainWindow {
             border-color: #4CB54C
           }
         }
+
+        -pub {
+          border-color: #884988
+          background-color: #5D245D
+          text-shadow: 1px 1px 1px #000
+          color: white
+
+          :active {
+            background-color: #331F33 !important
+          }
+
+          :hover {
+            background-color: #6D346D
+            border-color: #B54CB5
+          }
+        }
       }
     }
 
