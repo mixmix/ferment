@@ -39,7 +39,9 @@ module.exports = function (context, item) {
           computed(item.state, (s) => playButtonIcons[s || 'paused'])
         ]),
         h('header', [
-          h('div.feedTitle', [item.author.displayName]),
+          h('a.feedTitle', {
+            href: '#', 'ev-click': send(context.actions.viewProfile, item.author.id)
+          }, [item.author.displayName]),
           h('div.title', [item.title])
         ])
       ]),

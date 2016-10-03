@@ -19,7 +19,7 @@ MainWindow {
         border: 2px solid #505050
         border-radius: 4px
         background: #313030
-        color: #C5C5C5
+        color: #afafaf
         font-size: 120%
         cursor: pointer
         margin-left: 5px
@@ -28,6 +28,12 @@ MainWindow {
           text-decoration: none
           color: white
           border-color: #888
+        }
+
+        -selected {
+          border-color: #AAA
+          background: #222
+          color: white
         }
 
         -add {
@@ -48,6 +54,20 @@ MainWindow {
       }
     }
 
+    span.history {
+      a {
+        opacity: 0.3
+
+        -active {
+          opacity: 1
+        }
+      }
+
+      a + a {
+        margin-left: 0
+      }
+    }
+
     span.appTitle {
       flex: 1
       text-align: center
@@ -63,6 +83,7 @@ MainWindow {
   div.main {
     flex: 1
     overflow: auto
+    padding: 30px 50px
   }
 
   div.bottom {

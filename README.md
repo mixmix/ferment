@@ -23,14 +23,13 @@ It should also be possible to host your own server that allows people without th
 - [x] Sequencial feed playback
 - [x] API for adding file (transcode, analyse waveform)
 - [x] Upload interface [still needs more fields, and artwork]
-- [x] Connect to local peers and merge streams [currently requires intervention]
+- [x] Connect to local peers and merge streams
 - [x] Store artwork in blobstore, and retrieve again
+- [x] User setup (choose display name, bio, picture)
+- [x] Specific Artist Feed
 - [ ] Proper play/pause/loading buttons (nice try emoji)
 - [ ] Make Save / Download button work
-- [ ] User setup (choose username, title, location, bio, picture, banner)
-- [ ] Specific Artist Feed
 - [ ] Allow "delete" of audio posts (some kind of tombstoning)
-- [ ] Local Discovery
 - [ ] Likes
 - [ ] Reposting
 - [ ] Invite to pub

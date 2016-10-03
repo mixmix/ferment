@@ -1,0 +1,33 @@
+Profile {
+  header {
+    display: flex;
+    background: linear-gradient(0deg, #b3b37f, #ffffff);
+    padding: 30px;
+    margin: -30px -50px 20px;
+
+    div.image {
+      border-radius: 100px;
+      overflow: hidden;
+      height: 200px;
+      width: 200px;
+      background: linear-gradient(100deg, #c7af84, #669ba7);
+      background-size: cover;
+      background-position: 50% 50%;
+      box-shadow: 0px 4px 3px rgba(255, 255, 255, 0.6);
+    }
+
+    div.main {
+      flex: 1
+      margin: 30px 20px 20px 40px;
+      font-size: 130%;
+      h1 {
+        color: #6e804e;
+        text-shadow: none;
+        font-size: 250%;
+      }
+      div.description {
+        color: #4e4e4e
+      }
+    }
+  }
+}

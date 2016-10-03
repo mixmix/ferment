@@ -22,37 +22,16 @@ module.exports = function (ssbClient, config) {
 
   return {
     id: ssbClient.id,
-    getGlobalFeed () {
-      checkProfilesLoaded()
-      var result = MutantArray()
-      var sync = false
-      var readStream = ssbClient.createFeedStream({live: true, reverse: true})
-      pull(
-        readStream,
-        pull.drain(function (item) {
-          if (item.sync) {
-            sync = true
-          } else {
-            if (item.value.content.type === 'ferment/audio') {
-              var instance = itemCache.get(item.key)
-              if (!instance) {
-                instance = AudioPost(item.key, profiles.get(item.value.author))
-                instance.set(item.value.content)
-                itemCache.set(item.key, instance)
-              }
-              if (sync) {
-                result.insert(instance, 0)
-              } else {
-                result.push(instance)
-              }
-            }
-          }
-        })
-      )
-      result.destroy = function () {
-        readStream.end()
-      }
-      return result
+    getGlobalFeed (cb) {
+      return toMutantArray(ssbClient.createFeedStream({live: true}), cb)
+    },
+
+    getFollowingFeed (cb) {
+      return toMutantArray(ssbClient.createFeedStream({live: true}), cb)
+    },
+
+    getProfileFeed (id, cb) {
+      return toMutantArray(ssbClient.createHistoryStream({id, live: true}), cb)
     },
 
     setOwnDisplayName (name, cb) {
@@ -102,5 +81,33 @@ module.exports = function (ssbClient, config) {
     if (!profiles) {
       profiles = Profiles(ssbClient)
     }
+  }
+
+  function toMutantArray (readStream, cb) {
+    checkProfilesLoaded()
+    var result = MutantArray()
+    var processor = pull.drain(function (item) {
+      if (item.sync) {
+        cb && cb(result)
+      } else {
+        if (item.value.content.type === 'ferment/audio') {
+          var instance = itemCache.get(item.key)
+          if (!instance) {
+            instance = AudioPost(item.key, profiles.get(item.value.author))
+            instance.set(item.value.content)
+            itemCache.set(item.key, instance)
+          }
+          result.insert(instance, 0)
+        }
+      }
+    })
+
+    pull(readStream, processor)
+
+    result.destroy = function () {
+      processor.abort()
+    }
+
+    return result
   }
 }
