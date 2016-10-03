@@ -14,6 +14,67 @@ I want to see a thriving audio sharing community (actually would be COMMUNITIES!
 
 It should also be possible to host your own server that allows people without the app to stream music from your profile (or others that you want to seed). This will still be peer-to-peer but your server will act as a mirror and tracker.
 
+## Requirements
+
+You currently need to have `ffmpeg` on your system to add audio files. Until a packaged app installer is created, you need a modern version of `node` and `npm` installed in order to build.
+
+## Joining Pub Server
+
+By default, **Ferment** will only see other users that are on the same local area network as you. In order to share with users on the internet, you need to be invited to a pub server.
+
+Since I'm a nice person 💖 you can hang out in my pub, and you don't even have to by any drinks! 🍻
+
+Click 'Join Pub' on the top bar of Ferment and paste the following code:
+
+```
+&PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER=
+```
+
+If all goes to plan, you should start to see audio appear before your eyes! Give that play button a spin.
+
+## Install
+
+### from npm
+
+```bash
+$ npm install -g ferment
+```
+
+And then run using:
+
+```bash
+$ ferment
+```
+
+Install latest updates:
+
+```bash
+$ npm install -g ferment@latest
+```
+
+### from source
+
+**Warning:** Development is done on the master branch, so this could be broken right now!
+
+```bash
+$ git clone https://github.com/mmckegg/ferment.git
+$ cd ferment
+$ npm install
+```
+
+And then run using:
+
+```bash
+$ npm start
+```
+
+Install latest updates:
+
+```bash
+$ npm update
+$ npm run rebuild # make sure native add-ons are compatible with electron version
+```
+
 ## TODO
 
 - [x] Scuttlebot database
