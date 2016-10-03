@@ -15,6 +15,8 @@ module.exports = function (overview, width, height) {
 
 function ComputedInnerHtmlHook (args, fn) {
   return function (element) {
-    return watch(computed(args, fn), value => element.innerHTML = value)
+    return watch(computed(args, fn), (value) => {
+      element.innerHTML = value
+    })
   }
 }

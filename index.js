@@ -6,6 +6,7 @@ var serveBlobs = require('./lib/serve-blobs')
 var makeSingleInstance = require('./lib/make-single-instance')
 var pull = require('pull-stream')
 var pullFile = require('pull-file')
+var Path = require('path')
 
 var windows = {
   adders: new Set()
@@ -52,7 +53,7 @@ electron.ipcMain.on('open-add-window', openAddWindow)
 
 function openMainWindow () {
   if (!windows.main) {
-    windows.main = openWindow(context, __dirname + '/main-window.js', {
+    windows.main = openWindow(context, Path.join(__dirname, 'main-window.js'), {
       width: 1024,
       height: 768,
       titleBarStyle: 'hidden-inset',
@@ -71,8 +72,8 @@ function openMainWindow () {
 }
 
 function openAddWindow () {
-  var window = openWindow(context, __dirname + '/add-audio-window.js', {
-    //parent: windows.main,
+  var window = openWindow(context, Path.join(__dirname, 'add-audio-window.js'), {
+    // parent: windows.main,
     show: true,
     width: 850,
     height: 350,
@@ -98,7 +99,7 @@ function openAddWindow () {
 }
 
 function startBackgroundProcess () {
-  windows.background = openWindow(context, __dirname + '/background-window.js', {
+  windows.background = openWindow(context, Path.join(__dirname, 'background-window.js'), {
     center: true,
     fullscreen: false,
     fullscreenable: false,

@@ -1,6 +1,5 @@
 var WebTorrent = require('webtorrent')
 var electron = require('electron')
-var createTorrent = require('create-torrent')
 var parseTorrent = require('parse-torrent')
 var Path = require('path')
 var getExt = require('path').extname
