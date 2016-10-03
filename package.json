@@ -6,6 +6,7 @@
   "scripts": {
     "test": "standard",
     "start": "electron index.js",
+    "install": "npm run rebuild",
     "rebuild": "ELECTRON_VERSION=1.4.2 scripts/rebuild.sh",
     "rebuild-sodium": "scripts/rebuild-sodium.sh"
   },
