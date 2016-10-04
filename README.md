@@ -101,6 +101,7 @@ See [this guide](http://ssbc.github.io/docs/scuttlebot/howto-setup-a-pub.html) f
 - [x] Likes
 - [x] Backgrounding (keep seeding / syncing when main window is closed)
 - [x] Invite to pub
+- [ ] Make torrents more reliable via pub server trackers
 - [ ] Make Save / Download buttons work
 - [ ] Allow "delete" of audio posts (some kind of tombstoning)
 - [ ] Reposting
