@@ -54,11 +54,13 @@
     "ssb-markdown": "^3.0.0",
     "ssb-msg-schemas": "^6.2.1",
     "ssb-msgs": "^5.2.0",
+    "ssb-ref": "^2.6.1",
     "stream-to-pull-stream": "^1.7.2",
     "webtorrent": "~0.97.2",
     "xtend": "^4.0.1"
   },
   "devDependencies": {
+    "node-gyp": ">=1.0.2",
     "standard": "^8.3.0"
   }
 }

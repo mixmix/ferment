@@ -6,7 +6,9 @@ var dist = 'https://atom.io/download/atom-shell'
 var home = '~/.electron-gyp'
 var extend = require('xtend')
 
-execSync('npm rebuild', {
+// SO MUCH NASTY IN THIS FILE :(
+
+execSync('npm rebuild fsevents', {
   stdio: 'inherit',
   env: extend(process.env, {
     npm_config_target: ELECTRON_VERSION,
@@ -20,13 +22,13 @@ execSync('npm rebuild', {
 
 var sodiumPath = Path.join(__dirname, '..', 'node_modules/sodium-prebuilt')
 if (needToBuild(sodiumPath)) {
-  execSync('make sodium', {
+  execSync('make', {
     stdio: 'inherit',
     cwd: sodiumPath,
     env: process.env
   })
 
-  execSync(`node-gyp rebuild --target ${ELECTRON_VERSION} --arch x64 --dist-url ${dist}`, {
+  execSync(`node-gyp rebuild --target=${ELECTRON_VERSION} --arch=x64 --dist-url=${dist}`, {
     stdio: 'inherit',
     env: extend(process.env, { HOME: home }),
     cwd: sodiumPath
@@ -36,7 +38,7 @@ if (needToBuild(sodiumPath)) {
 
 var levelPath = Path.join(__dirname, '..', 'node_modules/leveldown')
 if (needToBuild(levelPath)) {
-  execSync(`node-gyp rebuild --target ${ELECTRON_VERSION} --arch x64 --dist-url ${dist}`, {
+  execSync(`node-gyp rebuild --target=${ELECTRON_VERSION} --arch=x64 --dist-url=${dist}`, {
     stdio: 'inherit',
     env: extend(process.env, { HOME: home }),
     cwd: levelPath
@@ -45,6 +47,9 @@ if (needToBuild(levelPath)) {
 }
 
 function needToBuild (path) {
+  if (process.argv.includes('--force')) {
+    return true
+  }
   var file = Path.join(path, 'built_for_electron')
   return fs.exists(file) && fs.readFileSync(file, 'utf8').trim() === ELECTRON_VERSION.trim()
 }
