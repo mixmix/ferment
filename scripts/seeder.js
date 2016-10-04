@@ -45,7 +45,7 @@ function startSeeding () {
         torrent.on('done', function (torrent) {
           console.log('finished downloading', torrent.infoHash)
         })
-        console.log('seeding', name)
+        console.log('seeding', name, torrent.progress)
       })
     }
   })
