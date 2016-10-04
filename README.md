@@ -4,7 +4,7 @@
 
 It is made possible by combining these **amazing** projects: [ssb](https://scuttlebot.io/), [webtorrent](https://webtorrent.io/) and [electron](http://electron.atom.io/).
 
-![](/assets/ferment-screenshot-0.0.0.png)
+![](/assets/ferment-screenshot-0.0.0.jpg)
 
 ## Experimental // EVERYTHING IS SUBJECT TO CHANGE AND BREAKING!
 
