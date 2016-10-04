@@ -17,9 +17,10 @@ createClient(ssbConfig.keys, ssbConfig, function (err, sbot) {
     sbot.createFeedStream({live: true}),
     pull.drain((item) => {
       if (item.value && authors.includes(item.value.author) && item.value.content.type === 'ferment/audio') {
-        var torrent = torrentClient.get(item.value.content.magnetURI)
+        var torrent = torrentClient.get(item.value.content.audioSrc)
         if (!torrent) {
-          addTorrent(item.value.content.magnetURI, (err, torrent) => {
+          console.log(item.value.content.audioSrc)
+          addTorrent(item.value.content.audioSrc, (err, torrent) => {
             if (err) console.log(err)
             console.log('added', torrent.infoHash)
           })
