@@ -7,6 +7,7 @@ var makeSingleInstance = require('./lib/make-single-instance')
 var pull = require('pull-stream')
 var pullFile = require('pull-file')
 var Path = require('path')
+var fs = require('fs')
 
 var windows = {
   dialogs: new Set()
@@ -179,6 +180,6 @@ function setupContext (appName, opts) {
 
   ssbConfig.manifest = context.sbot.getManifest()
   serveBlobs(context)
-
+  fs.writeFileSync(Path.join(ssbConfig.path, 'manifest.json'), JSON.stringify(ssbConfig.manifest))
   return context
 }
