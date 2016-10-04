@@ -15,6 +15,14 @@ var announce = [
   'udp://sbot.wetsand.co.nz:8000'
 ]
 
+var lastProgress = 0
+setInterval(() => {
+  if (lastProgress !== torrentClient.progress) {
+    lastProgress = torrentClient.progress
+    console.log(lastProgress)
+  }
+}, 1000)
+
 startSeeding()
 createClient(ssbConfig.keys, ssbConfig, function (err, sbot) {
   if (err) console.log(err)
