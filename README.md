@@ -68,7 +68,7 @@ $ npm run rebuild # make sure native add-ons are compatible with electron versio
 
 By default, **Ferment** will only see other users that are on the same local area network as you. In order to share with users on the internet, you need to be invited to a pub server.
 
-Since I'm a nice person 💖 you can hang out in my pub, and you don't even have to by any drinks! 🍻
+Since I'm a nice person 💖 you can hang out in my pub, and you don't even have to buy any drinks! 🍻
 
 Click 'Join Pub' on the sidebar then paste the code below:
 
