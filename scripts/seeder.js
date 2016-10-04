@@ -42,7 +42,7 @@ function startSeeding () {
         path: getTorrentDataPath(Path.basename(name, '.torrent')),
         announce
       }, (torrent) => {
-        torrent.on('done', function (torrent) {
+        torrent.on('done', function () {
           console.log('finished downloading', torrent.infoHash)
         })
         console.log('seeding', name, torrent.progress)
@@ -59,7 +59,7 @@ function addTorrent (torrentId, cb) {
     path: getTorrentDataPath(torrent.infoHash),
     announce
   }, function (torrent) {
-    torrent.on('done', function (torrent) {
+    torrent.on('done', function () {
       console.log('finished downloading', torrent.infoHash)
     })
     console.log('add torrent', torrent.infoHash)
