@@ -8,7 +8,7 @@ var markdown = require('./lib/markdown')
 var info = `
 ## By default, **Ferment** will only see other users that are on the same local area network as you.
 
-In order to share with users on the internet, you need to be [invited to a pub server](https://github.com/mmckegg/ferment).
+In order to share with users on the internet, you need to be [invited to a pub server](https://github.com/mmckegg/ferment#joining-pub-server).
 `.trim()
 
 module.exports = function (client, config, data) {
