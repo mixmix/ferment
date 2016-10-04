@@ -89,7 +89,8 @@ module.exports = function (ssbClient) {
       if (sync) {
         var result = []
         for (var id in profiles) {
-          if (!yourProfile.following.has(id) && id !== yourProfile.id) {
+          var profile = get(id)
+          if (!yourProfile.following.has(id) && id !== yourProfile.id && profile.postCount() > 0) {
             result.push(id)
             if (result.length > 10) {
               break
