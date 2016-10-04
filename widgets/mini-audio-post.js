@@ -29,7 +29,13 @@ module.exports = function (context, item) {
         'background-image': computed(url, url => url ? `url('${url}')` : '')
       }
     }, [
-      h('a.play', { 'ev-click': ev => context.player.togglePlay(item), href: '#' })
+      h('a.play', {
+        'ev-click': (ev) => {
+          ev.stopPropagation()
+          context.player.togglePlay(item)
+        },
+        href: '#'
+      })
     ]),
     h('div.main', [
       h('div.displayName', [ item.author.displayName ]),

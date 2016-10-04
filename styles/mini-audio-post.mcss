@@ -6,6 +6,40 @@ MiniAudioPost {
   padding: 5px 10px
   border-radius: 5px
   height: 60px
+
+  :hover {
+    div.image {
+      a.play {
+        opacity: 0.5
+      }
+    }
+  }
+
+  -waiting, -playing {
+    div.image {
+      a.play {
+        opacity: 0.5
+      }
+    }
+  }
+
+  -playing {
+    div.image {
+      a.play {
+        background-image: svg(pauseIcon)
+      }
+    }
+  }
+
+  -waiting {
+    div.image {
+      a.play {
+        background-image: svg(waitingIcon)
+        animation: playIconSpin 2s infinite linear
+      }
+    }
+  }
+
   div.image {
     overflow: hidden;
     height: 50px;
@@ -13,6 +47,24 @@ MiniAudioPost {
     background: linear-gradient(100deg, #c7af84, #669ba7);
     background-size: cover;
     background-position: 50% 50%;
+    display: flex
+
+    a.play {
+      transition: opacity 0.2s
+      opacity: 0
+      display: block
+      flex: 1
+      border-radius: 30px
+
+      background-color: rgba(0, 0, 0, 0.5)
+      background-image: svg(playIcon)
+      background-repeat: no-repeat
+      background-position: center
+
+      :hover {
+        opacity: 1
+      }
+    }
   }
   div.main {
     padding: 3px 10px

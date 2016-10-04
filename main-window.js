@@ -129,7 +129,7 @@ module.exports = function (client, config) {
   }
 
   function openJoinPubWindow () {
-
+    electron.ipcRenderer.send('open-join-pub-window')
   }
 }
 

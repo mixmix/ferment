@@ -1,0 +1,40 @@
+@svg playIcon {
+  width: 30px
+  height: 30px
+  content: "<path d='M5,4 L26,15 L5,26 Z' />"
+
+  path {
+    fill: #ebf7b1
+  }
+}
+
+@svg waitingIcon {
+  width: 30px
+  height: 30px
+  content: "<circle cx='15' cy='15' r='10' /><circle cx='10' cy='10' r='2' /><circle cx='20' cy='20' r='3' />"
+
+  circle {
+    stroke: #ebf7b1
+    stroke-width: 2px
+    fill: none
+  }
+}
+
+@svg pauseIcon {
+  width: 15px
+  height: 20px
+  content: "<rect x='0' width='5px' height='20' /><rect x='10' width='5px' height='20' />"
+
+  rect {
+    fill: #ebf7b1
+  }
+}
+
+@keyframes playIconSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

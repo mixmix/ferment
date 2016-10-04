@@ -22,12 +22,18 @@ if (process.argv[2] === '--test-peer') {
   if (process.argv[3]) {
     context.sbot.gossip.add(process.argv[3], 'local')
   }
+} else if (process.argv[2] === '--create-invite') {
+  context = setupContext('ferment', { allowPrivate: true })
+  context.sbot.invite.create(1, (err, code) => {
+    if (err) throw err
+    console.log(`invite code:\n\n${code}\n`)
+  })
 } else {
   makeSingleInstance(windows, openMainWindow)
   context = setupContext('ferment')
+  console.log('address:', context.sbot.getAddress())
 }
 
-console.log('address:', context.sbot.getAddress())
 
 electron.ipcMain.on('add-blob', (ev, id, path, cb) => {
   pull(
@@ -51,6 +57,7 @@ electron.app.on('activate', function (e) {
 
 electron.ipcMain.on('open-add-window', openAddWindow)
 electron.ipcMain.on('open-edit-profile-window', (ev, data) => openEditProfileWindow(data))
+electron.ipcMain.on('open-join-pub-window', openJoinPubWindow)
 
 function openMainWindow () {
   if (!windows.main) {
@@ -113,6 +120,30 @@ function openEditProfileWindow (opts) {
     backgroundColor: '#444',
     acceptFirstMouse: true,
     data: opts
+  })
+
+  windows.dialogs.add(window)
+
+  window.on('closed', function () {
+    windows.dialogs.delete(window)
+  })
+}
+
+function openJoinPubWindow () {
+  var window = openWindow(context, Path.join(__dirname, 'join-pub-window.js'), {
+    parent: windows.main,
+    modal: true,
+    show: true,
+    width: 650,
+    height: 280,
+    useContentSize: true,
+    maximizable: false,
+    fullscreenable: false,
+    skipTaskbar: true,
+    resizable: false,
+    title: 'Join Public Server',
+    backgroundColor: '#444',
+    acceptFirstMouse: true
   })
 
   windows.dialogs.add(window)

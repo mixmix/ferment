@@ -1,0 +1,23 @@
+JoinPub {
+  flex-direction: column;
+  padding: 30px;
+
+  (h2) {
+    margin-top: 0
+  }
+
+  (input) {
+    margin-top: 20px 
+    display: block
+    background: #333
+    font-size: 140%
+    padding: 10px
+    color: #EEE
+    border: 1px solid #222
+    width: 100%
+
+    :focus {
+      color: white
+    }
+  }
+}

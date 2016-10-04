@@ -94,8 +94,8 @@ If all goes to well, you'll start to see audio appear before your eyes! Give tha
 - [x] Display following stats
 - [x] Likes
 - [x] Backgrounding (keep seeding / syncing when main window is closed)
-- [ ] Invite to pub
-- [ ] Make Save / Download button work
+- [x] Invite to pub
+- [ ] Make Save / Download buttons work
 - [ ] Allow "delete" of audio posts (some kind of tombstoning)
 - [ ] Reposting
 - [ ] Playlists
