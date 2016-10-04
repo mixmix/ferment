@@ -17,6 +17,11 @@ window.addEventListener('error', function (e) {
   console.error(e.error.stack || 'Uncaught ' + e.error)
 })
 
+var announce = [
+  'ws://sbot.wetsand.co.nz:8000',
+  'udp://sbot.wetsand.co.nz:8000'
+]
+
 module.exports = function (client, config) {
   var torrentClient = new WebTorrent()
   var mediaPath = config.mediaPath
@@ -103,7 +108,8 @@ module.exports = function (client, config) {
       ipc.send('bg-response', id, null, torrent.magnetURI)
     } else {
       torrentClient.add(getTorrentPath(infoHash), {
-        path: getTorrentDataPath(infoHash)
+        path: getTorrentDataPath(infoHash),
+        announce
       }, function (torrent) {
         ipc.send('bg-response', id, null, torrent.magnetURI)
       })
@@ -127,7 +133,8 @@ module.exports = function (client, config) {
     var torrentPath = getTorrentPath(torrent.infoHash)
 
     torrentClient.add(torrent, {
-      path: getTorrentDataPath(torrent.infoHash)
+      path: getTorrentDataPath(torrent.infoHash),
+      announce
     }, function (torrent) {
       console.log('add torrent', torrent.infoHash)
       fs.writeFile(torrentPath, torrent.torrentFile, cb)
@@ -140,7 +147,8 @@ module.exports = function (client, config) {
       entries.forEach((name) => {
         if (getExt(name) === '.torrent') {
           torrentClient.add(Path.join(mediaPath, name), {
-            path: getTorrentDataPath(Path.basename(name, '.torrent'))
+            path: getTorrentDataPath(Path.basename(name, '.torrent')),
+            announce
           }, (torrent) => {
             console.log('seeding', name)
           })
@@ -159,7 +167,7 @@ module.exports = function (client, config) {
       console.log(`restarting ${paused.length} torrent(s)`)
       while (paused.length) {
         var torrentFile = paused.pop()
-        torrentClient.add(torrentFile, { path: mediaPath }, (torrent) => {
+        torrentClient.add(torrentFile, { path: mediaPath, announce }, (torrent) => {
           remaining -= 1
           if (remaining === 0) {
             cb && cb()
