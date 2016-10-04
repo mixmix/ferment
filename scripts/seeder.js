@@ -10,6 +10,11 @@ var torrentClient = WebTorrent()
 var authors = process.argv.slice(2)
 var mediaPath = ssbConfig.mediaPath
 
+var announce = [
+  'ws://sbot.wetsand.co.nz:8000',
+  'udp://sbot.wetsand.co.nz:8000'
+]
+
 startSeeding()
 createClient(ssbConfig.keys, ssbConfig, function (err, sbot) {
   if (err) console.log(err)
@@ -19,7 +24,6 @@ createClient(ssbConfig.keys, ssbConfig, function (err, sbot) {
       if (item.value && authors.includes(item.value.author) && item.value.content.type === 'ferment/audio') {
         var torrent = torrentClient.get(item.value.content.audioSrc)
         if (!torrent) {
-          console.log(item.value.content.audioSrc)
           addTorrent(item.value.content.audioSrc, (err, torrent) => {
             if (err) console.log(err)
             console.log('added', torrent.infoHash)
@@ -35,8 +39,12 @@ function startSeeding () {
   entries.forEach((name) => {
     if (Path.extname(name) === '.torrent') {
       torrentClient.add(Path.join(mediaPath, name), {
-        path: getTorrentDataPath(Path.basename(name, '.torrent'))
+        path: getTorrentDataPath(Path.basename(name, '.torrent')),
+        announce
       }, (torrent) => {
+        torrent.on('done', function (torrent) {
+          console.log('finished downloading', torrent.infoHash)
+        })
         console.log('seeding', name)
       })
     }
@@ -48,8 +56,12 @@ function addTorrent (torrentId, cb) {
   var torrentPath = getTorrentPath(torrent.infoHash)
 
   torrentClient.add(torrent, {
-    path: getTorrentDataPath(torrent.infoHash)
+    path: getTorrentDataPath(torrent.infoHash),
+    announce
   }, function (torrent) {
+    torrent.on('done', function (torrent) {
+      console.log('finished downloading', torrent.infoHash)
+    })
     console.log('add torrent', torrent.infoHash)
     fs.writeFile(torrentPath, torrent.torrentFile, (err) => {
       if (err) cb && cb(err)
