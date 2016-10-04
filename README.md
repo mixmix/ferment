@@ -4,6 +4,8 @@
 
 It is made possible by combining these **amazing** projects: [ssb](https://scuttlebot.io/), [webtorrent](https://webtorrent.io/) and [electron](http://electron.atom.io/).
 
+![](/assets/ferment-screenshot-0.0.0.png)
+
 ## Experimental // EVERYTHING IS SUBJECT TO CHANGE AND BREAKING!
 
 I'm just fiddling with ideas right now. My goal is to replace my need for SoundCloud as a [backyard musician that uploads WAY to much stuff](https://soundcloud.com/destroy-with-science). I no longer want to pay them $200 a year to host it all (also sick of being told to pay more money to get SoundCloud Go and having my feed ransomed out from underneath me).
