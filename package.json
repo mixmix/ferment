@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/mmckegg/ferment#readme",
   "dependencies": {
-    "@mmckegg/mutant": "~3.4.0",
+    "@mmckegg/mutant": "~3.4.1",
     "create-torrent": "~3.25.1",
     "electron-prebuilt": "~1.4.2",
     "insert-css": "^1.0.0",
@@ -49,6 +49,7 @@
     "ssb-client": "~4.1.0",
     "ssb-config": "~2.1.1",
     "ssb-markdown": "^3.0.0",
+    "ssb-msg-schemas": "^6.2.1",
     "ssb-msgs": "^5.2.0",
     "stream-to-pull-stream": "^1.7.2",
     "webtorrent": "~0.97.2",

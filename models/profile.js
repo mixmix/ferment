@@ -1,6 +1,8 @@
+var Value = require('@mmckegg/mutant/value')
 var Struct = require('@mmckegg/mutant/struct')
 var MutantDict = require('@mmckegg/mutant/dict')
 var MutantArray = require('@mmckegg/mutant/array')
+var MutantSet = require('@mmckegg/mutant/set')
 var computed = require('@mmckegg/mutant/computed')
 var mlib = require('ssb-msgs')
 
@@ -8,7 +10,11 @@ module.exports = function (id, myId) {
   var obj = Struct({
     displayNames: SocialValue(),
     images: SocialValue(),
-    descriptions: SocialValue()
+    descriptions: SocialValue(),
+    followers: MutantSet(),
+    following: MutantSet(),
+    postCount: Value(0),
+    likes: MutantSet()
   })
 
   obj.id = id

@@ -20,6 +20,22 @@ button {
     background-color: #333 !important
   }
 
+  -follow {
+    border-color: #29b7c5;
+    background-color: #317a96;
+    text-shadow: 1px 1px 1px #000;
+    color: white;
+
+    :active {
+      background-color: #07425f !important
+    }
+
+    :hover {
+      background-color: #345d6d;
+      border-color: #4c98b5;
+    }
+  }
+
   -stop {
     border-color: #884949
     background-color: #5D2524
@@ -49,6 +65,28 @@ button {
     :hover {
       background-color: #356D34
       border-color: #4CB54C
+    }
+  }
+
+  -full {
+    display: block
+    width: 100%
+    margin: 15px 0
+  }
+
+  -pub {
+    border-color: #884988
+    background-color: #5D245D
+    text-shadow: 1px 1px 1px #000
+    color: white
+
+    :active {
+      background-color: #331F33 !important
+    }
+
+    :hover {
+      background-color: #6D346D
+      border-color: #B54CB5
     }
   }
 }

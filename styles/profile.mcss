@@ -1,9 +1,12 @@
 Profile {
+  padding: 30px 50px
+
   header {
     display: flex;
     background: linear-gradient(0deg, #b3b37f, #ffffff);
     padding: 30px;
     margin: -30px -50px 20px;
+    border-bottom: 5px solid #666;
 
     div.image {
       border-radius: 100px;
@@ -28,6 +31,19 @@ Profile {
       div.description {
         color: #4e4e4e
       }
+    }
+  }
+
+  section {
+    display: flex
+    div.main {
+      flex: 2.5
+    }
+    div.side {
+      flex: 1
+      margin-left: 20px
+      min-width: 250px
+      max-width 400px
     }
   }
 }

@@ -5,6 +5,7 @@ var when = require('@mmckegg/mutant/when')
 var send = require('@mmckegg/mutant/send')
 var electron = require('electron')
 var Player = require('./widgets/player')
+var onceTrue = require('./lib/once-true')
 
 var views = {
   discoveryFeed: require('./views/discovery-feed'),
@@ -23,6 +24,8 @@ module.exports = function (client, config) {
   var canGoBack = Value(false)
 
   var actions = {
+    openEditProfileWindow,
+    openJoinPubWindow,
     viewProfile (id) {
       actions.setView('profile', id)
     },
@@ -42,7 +45,7 @@ module.exports = function (client, config) {
   var player = context.player = Player(context)
   var profile = api.getOwnProfile()
 
-  api.onProfilesLoaded(() => {
+  onceTrue(api.profilesLoaded, (value) => {
     if (!profile.displayName()) {
       // prompt use to set up profile the first time they open app
       openEditProfileWindow()
@@ -87,7 +90,6 @@ module.exports = function (client, config) {
           classList: [ computed(currentView, (x) => x[0] === 'profile' && x[1] === api.id ? '-selected' : null) ]
         }, '😀'),
         h('a -profile', {href: '#', 'ev-click': openEditProfileWindow}, ['Edit Profile']),
-        h('a -pub', {href: '#', 'ev-click': openJoinPubWindow}, ['Join Pub']),
         h('a -add', {href: '#', 'ev-click': openAddWindow}, ['+ Add Audio'])
       ])
     ]),

@@ -6,15 +6,13 @@ var when = require('@mmckegg/mutant/when')
 var AudioOverview = require('./audio-overview')
 var prettyBytes = require('prettier-bytes')
 
-var playButtonIcons = {
-  paused: '\u25B6',
-  playing: '⏸',
-  waiting: '📶'
-}
-
 module.exports = function (context, item) {
   var player = context.player
   var torrentStatus = TorrentStatus(context, item)
+  var profile = context.api.getProfile(context.api.id)
+  var likes = context.api.getLikesFor(item.id)
+  var likeCount = computed(likes, x => x.length)
+  var liked = computed([profile.likes, item.id], (likes, id) => likes.includes(id))
 
   var url = computed(item.artworkSrc, (src) => {
     if (src && src.startsWith('blobstore:')) {
@@ -35,9 +33,7 @@ module.exports = function (context, item) {
     }}),
     h('div.main', [
       h('div.title', [
-        h('a.play', { 'ev-click': send(player.togglePlay, item), href: '#' }, [
-          computed(item.state, (s) => playButtonIcons[s || 'paused'])
-        ]),
+        h('a.play', { 'ev-click': send(player.togglePlay, item), href: '#' }),
         h('header', [
           h('a.feedTitle', {
             href: '#', 'ev-click': send(context.actions.viewProfile, item.author.id)
@@ -60,7 +56,15 @@ module.exports = function (context, item) {
         h('span.duration', computed(item.duration, formatTime))
       ]),
       h('div.options', [
-        h('a.like', {href: '#'}, '💚 Like'),
+        h('a.like', {
+          href: '#',
+          'ev-click': send(toggleLike, { liked, context, item }),
+          classList: [
+            when(liked, '-active')
+          ]
+        }, [
+          '💚 ', when(likeCount, likeCount, 'Like')
+        ]),
         h('a.repost', {href: '#'}, '📡 Repost'),
         h('a.download', {href: '#'}, '⬇️ Download'),
         when(torrentStatus.downloading, h('span', [
@@ -70,6 +74,14 @@ module.exports = function (context, item) {
       ])
     ])
   ])
+}
+
+function toggleLike (opts) {
+  if (opts.liked()) {
+    opts.context.api.unlike(opts.item.id)
+  } else {
+    opts.context.api.like(opts.item.id)
+  }
 }
 
 function percent (value) {

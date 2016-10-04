@@ -7,6 +7,11 @@ MainWindow {
     div.top {
       padding-left: 70px
     }
+    div.top {
+      span.appTitle {
+        margin-right: 40px;
+      }
+    }
   }
 
   -win32, -linux {
@@ -62,22 +67,6 @@ MainWindow {
             border-color: #4CB54C
           }
         }
-
-        -pub {
-          border-color: #884988
-          background-color: #5D245D
-          text-shadow: 1px 1px 1px #000
-          color: white
-
-          :active {
-            background-color: #331F33 !important
-          }
-
-          :hover {
-            background-color: #6D346D
-            border-color: #B54CB5
-          }
-        }
       }
     }
 
@@ -110,7 +99,11 @@ MainWindow {
   div.main {
     flex: 1
     overflow: auto
-    padding: 30px 50px
+    display: flex
+
+    div {
+      flex: 1
+    }
   }
 
   div.bottom {

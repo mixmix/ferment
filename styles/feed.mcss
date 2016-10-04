@@ -1,0 +1,26 @@
+Feed {
+  display: flex
+
+  div.main {
+    flex: 3
+    padding: 24px 40px;
+    overflow-y: scroll
+    div.info {
+      font-size: 110%
+      margin: 20px 0
+    }
+
+    h1 {
+      margin-bottom: 20px
+    }
+  }
+
+  div.side {
+    flex: 1
+    min-width: 280px;
+    padding: 20px;
+    background: linear-gradient(100deg, #3f3840, #5b5c7f);
+    border-left: 1px solid #5a5757;
+    overflow-y: auto;
+  }
+}

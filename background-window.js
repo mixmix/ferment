@@ -7,6 +7,7 @@ var fs = require('fs')
 var ipc = electron.ipcRenderer
 var watch = require('@mmckegg/mutant/watch')
 var Value = require('@mmckegg/mutant/value')
+var watchEvent = require('./lib/watch-event')
 
 console.log = electron.remote.getGlobal('console').log
 process.exit = electron.remote.app.quit
@@ -203,12 +204,5 @@ module.exports = function (client, config) {
     releases[id] = watch(status, (value) => {
       ipc.send('bg-multi-response', id, value)
     })
-  }
-}
-
-function watchEvent (source, event, listener) {
-  source.on(event, listener)
-  return function () {
-    source.removeListener(event, listener)
   }
 }
