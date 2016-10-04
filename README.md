@@ -73,10 +73,14 @@ Since I'm a nice person 💖 you can hang out in my pub, and you don't even have
 Click 'Join Pub' on the sidebar then paste the code below:
 
 ```
-&PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER=
+120.138.27.120:43761:@uIL3USK7QJg5AHohnZC329+RXS09nwjc24ulFBH2Ngg=.ed25519~G0c0KMPSsZynwgM4wBLoUpfIyAP5gX9At2Ngs56tfmM=
 ```
 
 If all goes to well, you'll start to see audio appear before your eyes! Give that play button a spin.
+
+## Hosting Your Own Pub Server
+
+See [this guide](http://ssbc.github.io/docs/scuttlebot/howto-setup-a-pub.html) for full info.
 
 ## TODO
 
